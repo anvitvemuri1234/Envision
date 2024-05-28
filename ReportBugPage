@@ -1,0 +1,129 @@
+//
+//  ReportBugPage.swift
+//  MobileApplicationDevelopment
+//
+//  Created by Anvit Vemuri on 3/29/24.
+
+import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
+
+struct ReportBugPage: View {
+    @State private var bugDescription = ""
+    @State private var showPopup = false
+    @State private var errorMessage = ""
+    
+    var body: some View {
+        ZStack {
+            Color(.systemMint)
+                .ignoresSafeArea()
+            VStack(spacing: 20) {
+                Text("Bug Reporting Form")
+                    .font(.largeTitle)
+                    .foregroundColor(.blue)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(15)
+                    .padding(20)
+                    .multilineTextAlignment(.center)
+                
+                Text("If you've noticed any issues with the app, let us know! We're always looking to improve.")
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                    .font(.title2)
+                
+                ZStack(alignment: .topLeading) {
+                    TextEditor(text: $bugDescription)
+                        .padding()
+                        .frame(width: 350, height: 150)
+                        .background(Color.white)
+                        .cornerRadius(15)
+                        .multilineTextAlignment(.leading)
+                    
+                    if bugDescription.isEmpty {
+                        Text("Type issue here")
+                            .foregroundColor(.gray)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 25)
+                            .allowsHitTesting(false)
+                    }
+                }
+                
+                Button(action: {
+                    if !bugDescription.isEmpty {
+                        submitBugReport()
+                        errorMessage = "Your bug report has been submitted. We will try to resolve your issue as soon as possible."
+                    } else {
+                        errorMessage = "Error. Bug description cannot be empty."
+                        showPopup = true
+                    }
+                }) {
+                    Text("Submit")
+                        .font(.title)
+                        .foregroundColor(.blue)
+                        .padding()
+                        .background(Color.yellow)
+                        .cornerRadius(15)
+                }
+                
+                Spacer()
+            }
+            .padding()
+        }
+        .alert(isPresented: $showPopup) {
+            Alert(title: Text("Bug Reporting Form"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+        }
+    }
+    
+    func submitBugReport() {
+        guard let userID = Auth.auth().currentUser?.uid else {
+            print("User not authenticated")
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userDocRef = db.collection("reportBug").document(userID)
+        
+        userDocRef.getDocument { (document, error) in
+            if let error = error {
+                print("Error getting document: \(error)")
+                self.errorMessage = "Failed to submit bug report. Please try again."
+                self.showPopup = true
+                return
+            }
+            
+            if let document = document, document.exists {
+                var existingBugs = document.data()?["bugs"] as? [String] ?? []
+                existingBugs.append(self.bugDescription)
+                
+                userDocRef.setData(["bugs": existingBugs], merge: true) { error in
+                    if let error = error {
+                        print("Error updating document: \(error)")
+                        self.errorMessage = "Your bug report has been submitted. We will try to resolve your issue as soon as possible."
+                    } else {
+                        print("Bug report added successfully")
+                        self.showPopup = true
+                        self.bugDescription = ""
+                    }
+                }
+            } else {
+                userDocRef.setData(["bugs": [self.bugDescription]], merge: true) { error in
+                    if let error = error {
+                        print("Error adding document: \(error)")
+                        self.errorMessage = "Failed to submit bug report. Please try again."
+                    } else {
+                        print("Bug report added successfully")
+                        self.showPopup = true
+                        self.bugDescription = ""
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct ReportBugPage_Previews: PreviewProvider {
+    static var previews: some View {
+        ReportBugPage()
+    }
+}
