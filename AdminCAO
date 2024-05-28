@@ -1,0 +1,211 @@
+//
+//  AdminCAO.swift
+//  MobileAppDevelopment#2
+//
+//  Created by Anvit Vemuri on 4/26/24.
+//
+
+import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
+
+struct AdminCAO: View {
+    var selectedUserID: String
+    @State private var clubMemberships: [Participation] = []
+    @State private var showAlert = false
+    @State private var errorMessage = ""
+    @State private var successMessage = ""
+    @State private var navigateToFinalStatsManager = false
+    
+    struct Participation {
+        var clubName: String
+        var grade: String
+        var description: String
+        var isEditing: Bool = false
+    }
+    
+    var body: some View {
+        ZStack {
+            Color(.systemMint)
+                .ignoresSafeArea()
+            
+            ScrollView {
+                VStack {
+                    Text("Clubs and Organizations Viewing & Editing Page")
+                        .font(.largeTitle)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.blue)
+                        .frame(width: 375, height: 125)
+                        .background(.white)
+                        .cornerRadius(20)
+                    
+                    Text("This page allows you to view and edit the selected student's club/organization memberships. By clicking on the edit button, you can also edit the student's membership. Clicking on the save button will save your changes immediately.")
+                        .font(.title3)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white)
+                        .frame(width: 385, height: 150)
+                        .background(.black)
+                        .cornerRadius(10)
+                    
+                    Text("Total Number of Club and Organization Memberships: \(clubMemberships.count)")
+                        .multilineTextAlignment(.center)
+                        .font(.headline)
+                        .foregroundColor(.green)
+                        .frame(width: 375, height: 50)
+                        .background(.purple)
+                        .cornerRadius(10)
+                    
+                    Button(action: {
+                        for index in clubMemberships.indices {
+                            clubMemberships[index].isEditing.toggle()
+                        }
+                    }) {
+                        Text("Click here to edit any membership")
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                            .frame(width: 300, height: 45)
+                            .background(.yellow)
+                            .cornerRadius(10)
+                    }
+                    
+                    ForEach(clubMemberships.indices, id: \.self) { index in
+                        VStack() {
+                            if clubMemberships[index].isEditing {
+                                TextField("Sport Name", text: $clubMemberships[index].clubName)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(5)
+                                TextField("Grade", text: $clubMemberships[index].grade)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(5)
+                                    .keyboardType(.numberPad) // Restrict input to numbers only
+                                TextEditor(text: $clubMemberships[index].description)
+                                    .frame(height: 100)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(5)
+                            } else {
+                                Text("Sport Name: \(clubMemberships[index].clubName) \nGrade: \(clubMemberships[index].grade)\nDescription: \(clubMemberships[index].description)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.black)
+                                    .padding()
+                                    .frame(maxWidth: 385, alignment: .leading)
+                                    .background(.white)
+                                    .cornerRadius(20)
+                            }
+                            
+                            Divider() // Add a divider between each participation
+                        }
+                    }
+                    
+                    Button(action: {
+                        saveChanges()
+                    }) {
+                        Text("Save All Changes")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(width: 300, height: 30)
+                            .background(.green)
+                            .cornerRadius(10)
+                    }
+                }
+                .padding()
+            }
+        }
+        .alert(isPresented: $showAlert) {
+            if errorMessage.isEmpty {
+                return Alert(title: Text("Success. Data is Saved!"), message: Text(successMessage), dismissButton: .default(Text("OK")) {
+                    navigateToFinalStatsManager = true
+                })
+            } else {
+                return Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+            }
+        }
+
+        .onAppear {
+            fetchClubMemberships()
+        }
+    }
+    
+    private func fetchClubMemberships() {
+        let db = Firestore.firestore()
+        let userID = Auth.auth().currentUser?.uid ?? ""
+        guard !userID.isEmpty else {
+            print("User ID is empty.")
+            return
+        }
+        
+        let docRef = db.collection("usersData").document(selectedUserID)
+        docRef.getDocument { document, error in
+            if let document = document, document.exists {
+                if let clubMembershipsData = document.data()?["clubMemberships"] as? [[String: Any]] {
+                    self.clubMemberships = clubMembershipsData.map { participation in
+                        guard let clubName = participation["clubName"] as? String,
+                              let grade = participation["grade"] as? String,
+                              let description = participation["description"] as? String else {
+                            return Participation(clubName: "", grade: "", description: "")
+                        }
+                        return Participation(clubName: clubName, grade: grade, description: description)
+                    }
+                }
+            } else {
+                print("You have no athletic participations.")
+            }
+        }
+    }
+    
+    private func saveChanges() {
+        let db = Firestore.firestore()
+        let userID = selectedUserID
+        guard !userID.isEmpty else {
+            print("User ID is empty.")
+            return
+        }
+        
+        var isValid = true
+        
+        for participation in clubMemberships {
+            if let grade = Double(participation.grade), (9...12).contains(Int(grade)) {
+                continue
+            } else {
+                errorMessage = "Grade has to be a number between 9-12"
+                isValid = false
+                break
+            }
+        }
+        
+        if isValid {
+            let docRef = db.collection("usersData").document(userID)
+            var participationsData: [[String: Any]] = []
+            for participation in clubMemberships {
+                let data: [String: Any] = [
+                    "sportName": participation.clubName,
+                    "grade": participation.grade,
+                    "description": participation.description
+                ]
+                participationsData.append(data)
+            }
+            
+            docRef.setData(["clubMemberships": participationsData], merge: true) { error in
+                if let error = error {
+                    errorMessage = "Error saving data: \(error)"
+                    print(errorMessage)
+                    showAlert = true
+                } else {
+                    successMessage = "Data saved successfully."
+                    showAlert = true
+                    errorMessage = "" // Reset error message
+                }
+            }
+        } else {
+            showAlert = true
+        }
+    }
+}
+
+struct AdminCAO_Previews: PreviewProvider {
+    static var previews: some View {
+        AdminCAO(selectedUserID: "SampleUserID")
+    }
+}
