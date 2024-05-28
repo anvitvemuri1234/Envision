@@ -1,0 +1,170 @@
+import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
+
+struct AthleticParticipationPage: View {
+    @State private var sportName = ""
+    @State private var selectedOption = 0
+    @State private var eventDescription = ""
+    @State private var showAlert = false
+    @State private var userName = ""
+    
+    var options = ["9", "10", "11", "12"]
+    let db = Firestore.firestore()
+    let userID = Auth.auth().currentUser?.uid ?? ""
+    
+    var body: some View {
+        ZStack {
+            Color(.systemMint)
+                .ignoresSafeArea()
+            VStack {
+                Text("Please enter the sport's name, description, and grade level")
+                    .font(.largeTitle)
+                    .multilineTextAlignment(.center)
+                    .padding(15)
+                    .background(Color.white)
+                    .cornerRadius(15)
+                    .foregroundColor(.blue)
+                
+                HStack {
+                    Text("Name: \(userName)")
+                        .padding()
+                    Spacer()
+                }
+                
+                TextField("Sport Name", text: $sportName)
+                    .padding()
+                    .frame(width: 250, height: 50)
+                    .background(Color.white)
+                    .cornerRadius(15)
+                    .multilineTextAlignment(.center)
+                
+                HStack {
+                    Text("Grade: ")
+                        .font(.title3)
+                    
+                    Picker("Options", selection: $selectedOption) {
+                        ForEach((0..<options.count), id: \.self) { index in
+                            Text(self.options[index]).tag(index)
+                        }
+                    }
+                    .frame(width: 75, height: 20)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(15)
+                    .padding()
+                }
+                
+                ZStack(alignment: .topLeading) {
+                    TextEditor(text: $eventDescription)
+                        .padding()
+                        .frame(width: 350, height: 200) // Adjust height as needed
+                        .background(Color.white)
+                        .cornerRadius(15)
+                        .multilineTextAlignment(.leading)
+                    
+                    if eventDescription.isEmpty {
+                        Text("Please describe your event here")
+                            .foregroundColor(.gray)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 25)
+                            .allowsHitTesting(false)
+                    }
+                }
+                
+                Spacer()
+                
+                Button(action: {
+                    saveData()
+                }) {
+                    Text("Confirm")
+                        .font(.title)
+                        .padding(15)
+                        .background(Color.yellow)
+                        .foregroundColor(.blue)
+                        .cornerRadius(15)
+                }
+                .alert(isPresented: $showAlert) {
+                    Alert(title: Text("Success"), message: Text("Your data is saved!"), dismissButton: .default(Text("OK")))
+                }
+                
+                Spacer()
+            }
+        }
+        .onAppear {
+            fetchUserName() // Fetch the user's name when the view appears
+        }
+    }
+    
+    func fetchUserName() {
+        // Fetch the user's name from Firestore based on the userID
+        db.collection("users").document(userID).getDocument { (document, error) in
+            if let document = document, document.exists {
+                // Get the user's name from the document data
+                if let name = document["name"] as? String {
+                    self.userName = name // Use 'self' to refer to the state variable
+                }
+            } else {
+                print("User document does not exist")
+            }
+        }
+    }
+    
+    func saveData() {
+        guard !userID.isEmpty else {
+            print("User ID is empty.")
+            return
+        }
+        
+        let data = [
+            "sportName": sportName,
+            "grade": options[selectedOption],
+            "description": eventDescription
+        ]
+        
+        let docRef = db.collection("usersData").document(userID)
+        docRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                let participations = document.data()?["athleticParticipations"] as? [[String: Any]] ?? []
+                var updatedParticipations = participations
+                updatedParticipations.append(data)
+                
+                docRef.updateData([
+                    "athleticParticipations": updatedParticipations
+                ]) { error in
+                    if let error = error {
+                        print("Error updating document: \(error)")
+                    } else {
+                        showAlert = true
+                        clearFields()
+                    }
+                }
+            } else {
+                let initialData = [
+                    "athleticParticipations": [data]
+                ]
+                docRef.setData(initialData) { error in
+                    if let error = error {
+                        print("Error adding document: \(error)")
+                    } else {
+                        showAlert = true
+                        clearFields()
+                    }
+                }
+            }
+        }
+    }
+    
+    func clearFields() {
+        sportName = ""
+        selectedOption = 0
+        eventDescription = ""
+    }
+}
+
+// Preview
+struct AthleticParticipationPage_Previews: PreviewProvider {
+    static var previews: some View {
+        AthleticParticipationPage()
+    }
+}
