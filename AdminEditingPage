@@ -1,0 +1,140 @@
+//
+//  AdminEditingPage.swift
+//  MobileAppDevelopment#2
+//
+//  Created by Anvit Vemuri on 4/25/24.
+//
+
+import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
+
+struct AdminEditingPage: View {
+    var selectedUserID: String
+    @State private var athleticParticipations: [Participation] = []
+    @State private var showAlert = false
+    @State private var errorMessage = ""
+    @State private var successMessage = ""
+    @State private var navigateToFinalStatsManager = false
+    
+    struct Participation {
+        var sportName: String
+        var grade: String
+        var description: String
+        var isEditing: Bool = false
+    }
+    
+    var body: some View {
+        ZStack {
+            Color(.systemMint)
+                .ignoresSafeArea()
+            
+            VStack {
+                
+                Text("This page allows you to select the contents of the category that you would like to view or edit for the student. Simply click on the button to see the specific section you would like to view/edit.")
+                    .font(.title2)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.white)
+                    .frame(width: 370, height: 200)
+                    .background(.blue)
+                    .cornerRadius(20)
+                
+                
+                HStack {
+                    Spacer()
+                    
+                    NavigationLink(destination: AdminAA(selectedUserID: selectedUserID)) {
+                        Text("Academic Achievements")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 170, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    
+                    
+                    Spacer()
+                    
+                    NavigationLink(destination: AdminAP(selectedUserID: selectedUserID) ) {
+                        Text("Athletic Participation")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 170, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    Spacer()
+                }
+                
+                HStack {
+                    Spacer()
+                    
+                    NavigationLink(destination: AdminPAE(selectedUserID: selectedUserID) ) {
+                        Text("Performing Arts Experience")
+                            .foregroundColor(.blue)
+                            .font(.title3)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 171, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    
+                    Spacer()
+                    
+                    NavigationLink(destination: AdminCAO(selectedUserID: selectedUserID) ) {
+                        Text("Clubs and Organizations")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 170, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    Spacer()
+                }
+                
+                HStack {
+                    Spacer()
+                    NavigationLink(destination: AdminCSH(selectedUserID: selectedUserID) ) {
+                        Text("Community Service Hours")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 170, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    
+                    Spacer()
+                    
+                    NavigationLink(destination: AdminHC(selectedUserID: selectedUserID) ) {
+                        Text("Honors       Classes")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 170, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    Spacer()
+                }
+            }
+            
+            
+        }
+    }
+}
+
+struct AdminEditingPage_Previews: PreviewProvider {
+    static var previews: some View {
+        AdminEditingPage(selectedUserID: "SampleUserID") // Pass a sample userID for preview
+    }
+}
