@@ -1,0 +1,134 @@
+//
+//  FAQPage.swift
+//  MobileApplicationDevelopment
+//
+//  Created by Anvit Vemuri on 3/28/24.
+//
+
+import SwiftUI
+
+struct FAQPage: View {
+    // Define an array of options for the dropdown
+    let categories = ["Student Usage", "Administrator Usage", "Interface Usage"]
+    
+    let studentUsageQuestions = ["How can I find out what my passkey is?", "Can I change my passkey?", "How can I share my achievements?"]
+    let administratorUsageQuestions = ["What measures are in place to protect student privacy?", "Can multiple administrators access the same student porfolio at the same time?", "How often is the app updated, and will I be notified of updates?", "How can I change a student's passkey?"]
+    let interfaceUsageQuestions = ["How can I return to the previous/home screen?", "Is this program meant to be used as a mobile app or from a web browser?", "Will my data be transfered if I log in on multiple devices?"]
+    
+    let studentUsageAnswers = ["Your student passkey is a four digit number provided by your school. Check your inbox for an email containing your Participation Tracker Passkey. If you have not received an email with your passkey, try contacting a school administrator.", "Yes, passkey changing is possible. If you would like to change your passkey for any reason, contact a school administrator. Please do not share your passkey with anyone, even your friends.", "At the bottom of each portfolio, you can find Instagram and LinkedIn logos. Screenshotting your page and clicking on these logos allows you to share your achievements with the world!"]
+    let administratorUsageAnswers = ["The app is compliant with relevant data protection regulations, such as GDPR or FERPA, ensuring that all student information is securely stored and accessed only by authorized personnel.", "Yes, the app supports multiple administrators accessing the same portfolio simultaneously. However, editing the same activity at the same time is restricted to prevent data conflicts.", "The app receives regular updates for new features and improvements. Administrators will be notified via email and in-app notifications about upcoming updates.", "To change a student’s passkey, find the passkey in the dataset next to their name and click “edit.” You are then able to change the value to anything they want."]
+    let interfaceUsageAnswers = ["Each screen has a back button on the bottom left corner that can be clicked to return to the previous screen.", "The program is designed around a mobile device for ease of access for students, however it is just as effective from a computer, laptop, or any other type of device that can access the internet.", "Yes, all data on this program is saved dynamically through the cloud."]
+    
+    // Define state variables to store the selected option
+    @State private var selectedCategory = "Student Usage"
+    @State private var selectedQuestionIndex = 0 // Store the index of the selected question
+    
+    var selectedQuestions: [String] {
+        switch selectedCategory {
+        case "Student Usage":
+            return studentUsageQuestions
+        case "Administrator Usage":
+            return administratorUsageQuestions
+        case "Interface Usage":
+            return interfaceUsageQuestions
+        default:
+            return []
+        }
+    }
+    
+    var selectedAnswers: [String] {
+        switch selectedCategory {
+        case "Student Usage":
+            return studentUsageAnswers
+        case "Administrator Usage":
+            return administratorUsageAnswers
+        case "Interface Usage":
+            return interfaceUsageAnswers
+        default:
+            return []
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            Color(.systemMint)
+                .ignoresSafeArea()
+            
+            VStack {
+                Text("Frequently Asked Questions")
+                    .font(.largeTitle)
+                    .foregroundColor(.blue)
+                    .padding(10)
+                    .background(Color.white)
+                    .cornerRadius(15)
+                    .multilineTextAlignment(.center)
+                    .padding()
+                HStack {
+                    Text("Category: ")
+                        .font(.title)
+                        .padding(.leading)
+                    
+                    Picker("Options", selection: $selectedCategory) {
+                        ForEach(categories, id: \.self) {
+                            Text($0)
+                        }
+                    }
+                    .frame(minWidth: 200, minHeight: 50)
+                    .background(Color.yellow)
+                    .pickerStyle(MenuPickerStyle())
+                    .cornerRadius(15)
+                }
+                HStack {
+                    Text("Question: ")
+                        .font(.title)
+                        .padding(.leading)
+                    
+                    Picker("Questions", selection: $selectedQuestionIndex) {
+                        ForEach(selectedQuestions.indices, id: \.self) { index in
+                            Text(selectedQuestions[index])
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.black)
+                        }
+                    }
+                    .frame(minWidth: 200, minHeight: 100)
+                    .background(Color.yellow)
+                    .pickerStyle(MenuPickerStyle())
+                    .cornerRadius(15)
+                }
+
+                HStack {
+                    Text("Answer: ")
+                        .font(.title)
+                    Spacer()
+                }
+                Text((selectedAnswers[selectedQuestionIndex]))
+                    .padding(15)
+                    .background(Color.yellow)
+                    .multilineTextAlignment(.center)
+                    .cornerRadius(15)
+                    .font(.title2)
+                    .padding()
+                Spacer()
+                
+                NavigationLink(destination: ReportBugPage()) {
+                    Text("Report Bug")
+                        .font(.title)
+                        .padding(10)
+                        .background(.yellow)
+                        .cornerRadius(15)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+
+                }
+                Spacer()
+            }
+
+        }
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}
