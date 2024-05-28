@@ -1,0 +1,212 @@
+//
+//  AdminAP.swift
+//  MobileAppDevelopment#2
+//
+//  Created by Anvit Vemuri on 4/26/24.
+//
+
+import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
+
+struct AdminAP: View {
+    var selectedUserID: String
+    @State private var athleticParticipations: [Participation] = []
+    @State private var showAlert = false
+    @State private var errorMessage = ""
+    @State private var successMessage = ""
+    @State private var navigateToFinalStatsManager = false
+    
+    struct Participation {
+        var sportName: String
+        var grade: String
+        var description: String
+        var isEditing: Bool = false
+    }
+    
+    var body: some View {
+        ZStack {
+            Color(.systemMint)
+                .ignoresSafeArea()
+            
+            ScrollView {
+                VStack {
+                    Text("Athletic Participation Viewing & Editing Page")
+                        .font(.largeTitle)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.blue)
+                        .frame(width: 375, height: 125)
+                        .background(.white)
+                        .cornerRadius(20)
+                    
+                    Text("This page allows you to view and edit the selected student's athletic participations. By clicking on the edit button, you can also edit the student's participation. Clicking on the save button will save your changes immediately.")
+                        .font(.title3)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white)
+                        .frame(width: 385, height: 150)
+                        .background(.black)
+                        .cornerRadius(10)
+                    
+                    Text("Total Number of Athletic Participations: \(athleticParticipations.count)")
+                        .multilineTextAlignment(.center)
+                        .font(.headline)
+                        .foregroundColor(.green)
+                        .frame(width: 375, height: 50)
+                        .background(.purple)
+                        .cornerRadius(10)
+                    
+                    Button(action: {
+                        for index in athleticParticipations.indices {
+                            athleticParticipations[index].isEditing.toggle()
+                        }
+                    }) {
+                        Text("Click here to edit any participation")
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                            .frame(width: 300, height: 45)
+                            .background(.yellow)
+                            .cornerRadius(10)
+                    }
+                    
+                    ForEach(athleticParticipations.indices, id: \.self) { index in
+                        VStack() {
+                            if athleticParticipations[index].isEditing {
+                                TextField("Sport Name", text: $athleticParticipations[index].sportName)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(5)
+                                TextField("Grade", text: $athleticParticipations[index].grade)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(5)
+                                    .keyboardType(.numberPad) // Restrict input to numbers only
+                                TextEditor(text: $athleticParticipations[index].description)
+                                    .frame(height: 100)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(5)
+                            } else {
+                                Text("Sport Name: \(athleticParticipations[index].sportName) \nGrade: \(athleticParticipations[index].grade)\nDescription: \(athleticParticipations[index].description)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.black)
+                                    .padding()
+                                    .frame(maxWidth: 385, alignment: .leading)
+                                    .background(.white)
+                                    .cornerRadius(20)
+                            }
+                            
+                            Divider() // Add a divider between each participation
+                        }
+                    }
+                    
+                    Button(action: {
+                        saveChanges()
+                    }) {
+                        Text("Save All Changes")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(width: 300, height: 30)
+                            .background(.green)
+                            .cornerRadius(10)
+                    }
+                }
+                .padding()
+            }
+        }
+        .alert(isPresented: $showAlert) {
+            if errorMessage.isEmpty {
+                return Alert(title: Text("Success. Data is Saved!"), message: Text(successMessage), dismissButton: .default(Text("OK")) {
+                    navigateToFinalStatsManager = true
+                })
+            } else {
+                return Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+            }
+        }
+
+        .onAppear {
+            fetchAthleticParticipations()
+        }
+    }
+    
+    private func fetchAthleticParticipations() {
+        let db = Firestore.firestore()
+        let userID = Auth.auth().currentUser?.uid ?? ""
+        guard !userID.isEmpty else {
+            print("User ID is empty.")
+            return
+        }
+        
+        let docRef = db.collection("usersData").document(selectedUserID)
+        docRef.getDocument { document, error in
+            if let document = document, document.exists {
+                if let athleticParticipationsData = document.data()?["athleticParticipations"] as? [[String: Any]] {
+                    self.athleticParticipations = athleticParticipationsData.map { participation in
+                        guard let sportName = participation["sportName"] as? String,
+                              let grade = participation["grade"] as? String,
+                              let description = participation["description"] as? String else {
+                            return Participation(sportName: "", grade: "", description: "")
+                        }
+                        return Participation(sportName: sportName, grade: grade, description: description)
+                    }
+                }
+            } else {
+                print("You have no athletic participations.")
+            }
+        }
+    }
+    
+    private func saveChanges() {
+        let db = Firestore.firestore()
+        let userID = selectedUserID
+        guard !userID.isEmpty else {
+            print("User ID is empty.")
+            return
+        }
+        
+        var isValid = true
+        
+        for participation in athleticParticipations {
+            if let grade = Double(participation.grade), (9...12).contains(Int(grade)) {
+                continue
+            } else {
+                errorMessage = "Grade has to be a number between 9-12"
+                isValid = false
+                break
+            }
+        }
+        
+        if isValid {
+            let docRef = db.collection("usersData").document(selectedUserID)
+            var participationsData: [[String: Any]] = []
+            for participation in athleticParticipations {
+                let data: [String: Any] = [
+                    "sportName": participation.sportName,
+                    "grade": participation.grade,
+                    "description": participation.description
+                ]
+                participationsData.append(data)
+            }
+            
+            docRef.setData(["athleticParticipations": participationsData], merge: true) { error in
+                if let error = error {
+                    errorMessage = "Error saving data: \(error)"
+                    print(errorMessage)
+                    showAlert = true
+                } else {
+                    successMessage = "Data saved successfully."
+                    showAlert = true
+                    errorMessage = "" // Reset error message
+                }
+            }
+        } else {
+            showAlert = true
+        }
+    }
+}
+
+
+struct AdminAP_Previews: PreviewProvider {
+    static var previews: some View {
+        AdminAP(selectedUserID: "SampleUserID") // Pass a sample userID for preview
+    }
+}
