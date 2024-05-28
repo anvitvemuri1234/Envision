@@ -1,0 +1,721 @@
+//
+//  ResumeBuilderPage.swift
+//  MobileAppDevelopment#2
+//
+//  Created by Anvit Vemuri on 4/15/24.
+//
+
+import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
+import UIKit
+import Vision
+
+struct ResumeBuilderPage: View {
+    @State private var isFlipped = false
+    @State private var academicAchievements: [[String: String]] = []
+    @State private var athleticParticipations: [[String: String]] = []
+    @State private var performingArtsExperiences: [[String: String]] = []
+    @State private var clubMemberships: [[String: String]] = []
+    @State private var communityServiceHours: [[String: String]] = []
+    @State private var honorsClasses: [[String: String]] = []
+    @State private var userName: String = ""
+    @State private var frontPageText: String = "Front Page"
+    @State private var backPageText: String = "Back Page"
+    @State private var showSignInView = false
+
+    var body: some View {
+        ZStack {
+            Color(.systemMint)
+                .ignoresSafeArea()
+            
+            ScrollView {
+                VStack {
+                    Spacer().frame(height: 0)
+
+                    if isFlipped {
+                        ZStack(alignment: .top) {
+                            Image("Blank Paper Back")
+                                .resizable()
+                                .frame(width: 365, height: 500)
+                                .cornerRadius(5)
+                                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+                            
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("")
+                                
+                                Text("Club And Organization Memberships")
+                                    .multilineTextAlignment(.center)
+                                    .font(.title2)
+                                    .offset(x:17)
+                                Text("")
+                                    .frame(height: 5)
+                                
+                                
+                                HStack {
+                                    ForEach(clubMemberships.indices, id: \.self) { index in
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Text("Membership #\(index + 1): \(clubMemberships[index]["clubName"] ?? "")")
+                                            Text("Grade: \(clubMemberships[index]["grade"] ?? "")")
+                                            Text("Description: \(clubMemberships[index]["description"] ?? "")")
+                                        }
+                                        .font(.caption)
+                                        .frame(maxWidth: .infinity)
+                                    }
+                                }
+                                
+                                Text("    ________________________________________")
+                                Text("Community Service Hours")
+                                    .multilineTextAlignment(.center)
+                                    .font(.title2)
+                                    .offset(x:17)
+                                Text("")
+                                    .frame(height: 5)
+                                
+                                
+                                HStack {
+                                    ForEach(communityServiceHours.indices, id: \.self) { index in
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Text("Service #\(index + 1): \(communityServiceHours[index]["serviceName"] ?? "")")
+                                            Text("Grade: \(communityServiceHours[index]["grade"] ?? "")")
+                                            Text("Description: \(communityServiceHours[index]["description"] ?? "")")
+                                        }
+                                        .font(.caption)
+                                        .frame(maxWidth: .infinity)
+                                    }
+                                }
+                                
+                                Text("    ________________________________________")
+                                Text("Honors Classes")
+                                    .multilineTextAlignment(.center)
+                                    .font(.title2)
+                                    .offset(x:17)
+                                Text("")
+                                    .frame(height: 5)
+                                
+                                
+                                HStack {
+                                    ForEach(honorsClasses.indices, id: \.self) { index in
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Text("Class #\(index + 1): \(honorsClasses[index]["className"] ?? "")")
+                                            Text("Grade: \(honorsClasses[index]["grade"] ?? "")")
+                                            Text("Description: \(honorsClasses[index]["description"] ?? "")")
+                                        }
+                                        .font(.caption)
+                                        .frame(maxWidth: .infinity)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        ZStack(alignment: .top) {
+                            Image("Blank Paper")
+                                .resizable()
+                                .frame(width: 365, height: 500)
+                                .cornerRadius(5)
+                                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+                            
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("Resume")
+                                    .font(.largeTitle)
+                                    .multilineTextAlignment(.center)
+                                
+                                Text("________________________________________")
+                                
+                                Text("Academic Achievements")
+                                    .font(.title2)
+                                Text("")
+                                    .frame(height: 5)
+                                
+                                HStack {
+                                    ForEach(academicAchievements.indices, id: \.self) { index in
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Text("Achievement #\(index + 1): \(academicAchievements[index]["achievementName"] ?? "")")
+                                            Text("Grade: \(academicAchievements[index]["grade"] ?? "")")
+                                            Text("Description: \(academicAchievements[index]["description"] ?? "")")
+                                        }
+                                        .font(.caption)
+                                        .frame(maxWidth: .infinity)
+                                    }
+                                }
+                                Text("________________________________________")
+                                Text("Athletic Participations")
+                                    .font(.title2)
+                                Text("")
+                                    .frame(height: 5)
+                                
+                                
+                                HStack {
+                                    ForEach(athleticParticipations.indices, id: \.self) { index in
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Text("Participation #\(index + 1): \(athleticParticipations[index]["sportName"] ?? "")")
+                                            Text("Grade: \(athleticParticipations[index]["grade"] ?? "")")
+                                            Text("Description: \(athleticParticipations[index]["description"] ?? "")")
+                                        }
+                                        .font(.caption)
+                                        .frame(maxWidth: .infinity)
+                                    }
+                                }
+                                Text("________________________________________")
+                                Text("Performing Arts Experiences")
+                                    .font(.title2)
+                                Text("")
+                                    .frame(height: 5)
+                                
+                                
+                                HStack {
+                                    ForEach(performingArtsExperiences.indices, id: \.self) { index in
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Text("Experience #\(index + 1): \(performingArtsExperiences[index]["performingArtsExperienceName"] ?? "")")
+                                            Text("Grade: \(performingArtsExperiences[index]["grade"] ?? "")")
+                                            Text("Description: \(performingArtsExperiences[index]["description"] ?? "")")
+                                        }
+                                        .font(.caption)
+                                        .frame(maxWidth: .infinity)
+                                    }
+                                }
+                            }
+                            .padding()
+                        }
+                    }
+                    
+                    Button(action: {
+                        withAnimation {
+                            isFlipped.toggle()
+                        }
+                    }) {
+                        Image(systemName: "arrow.right.arrow.left.circle.fill")
+                            .font(.title)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                            .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
+                    }
+                    .padding(.bottom, 20)
+                    
+                    HStack {
+                        VStack {
+                            Button(action: {
+                                saveImages()
+                            }) {
+                                Image(systemName: "square.and.arrow.down")
+                                    .font(.title)
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .background(Color.green)
+                                    .cornerRadius(10)
+                                    .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
+                            }
+
+                        }
+                        
+                        VStack {
+                            Button(action: {
+                                if let url = URL(string: "https://www.instagram.com/") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }) {
+                                Image("InstagramLogo") // Replace "instagram_logo" with the name of your Instagram logo image asset
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 70, height: 70) // Adjust the size of the Instagram icon as needed
+                            }
+                            
+                            Button("How to Post on Instagram") {
+                                if let url = URL(string: "https://help.instagram.com/442418472487929") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                        }
+                        
+                        VStack {
+                            Button(action: {
+                                if let url = URL(string: "https://www.linkedin.com/") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }) {
+                                Image("LinkedInLogo") // Replace "instagram_logo" with the name of your Instagram logo image asset
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 70, height: 70) // Adjust the size of the Instagram icon as needed
+                                    .cornerRadius(10)
+                            }
+                            
+                            Button("How to Post on LinkedIn") {
+                                if let url = URL(string: "https://www.linkedin.com/help/linkedin/answer/a527229") {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                        }
+                    }
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            HStack {
+                                Text("Settings:")
+                                    .font(.title3)
+                                    .foregroundColor(.black)
+                                
+                                NavigationLink {
+                                    SettingsView(showSignInView: $showSignInView)
+                                } label: {
+                                    Image(systemName: "gear")
+                                        .font(.headline)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            }
+
+        .onAppear {
+            fetchUserName()
+            fetchAcademicAchievementData { data in
+                if let data = data {
+                    self.academicAchievements = data.map { dict in
+                        var stringDict: [String: String] = [:]
+                        for (key, value) in dict {
+                            if let stringValue = value as? String {
+                                stringDict[key] = stringValue
+                            }
+                        }
+                        return stringDict
+                    }
+                }
+            }
+            
+            fetchAthleticParticipationsData { data in
+                if let data = data {
+                    self.athleticParticipations = data.map { dict in
+                        var stringDict: [String: String] = [:]
+                        for (key, value) in dict {
+                            if let stringValue = value as? String {
+                                stringDict[key] = stringValue
+                            }
+                        }
+                        return stringDict
+                    }
+                }
+            }
+            
+            fetchPerformingArtsExperiencesData { data in
+                if let data = data {
+                    self.performingArtsExperiences = data.map { dict in
+                        var stringDict: [String: String] = [:]
+                        for (key, value) in dict {
+                            if let stringValue = value as? String {
+                                stringDict[key] = stringValue
+                            }
+                        }
+                        return stringDict
+                    }
+                }
+            }
+            
+            fetchClubMembershipsData { data in
+                if let data = data {
+                    self.clubMemberships = data.map { dict in
+                        var stringDict: [String: String] = [:]
+                        for (key, value) in dict {
+                            if let stringValue = value as? String {
+                                stringDict[key] = stringValue
+                            }
+                        }
+                        return stringDict
+                    }
+                }
+            }
+            fetchCommunityServiceHoursData { data in
+                if let data = data {
+                    self.communityServiceHours = data.map { dict in
+                        var stringDict: [String: String] = [:]
+                        for (key, value) in dict {
+                            if let stringValue = value as? String {
+                                stringDict[key] = stringValue
+                            }
+                        }
+                        return stringDict
+                    }
+                }
+            }
+            fetchHonorsClassesData { data in
+                if let data = data {
+                    self.honorsClasses = data.map { dict in
+                        var stringDict: [String: String] = [:]
+                        for (key, value) in dict {
+                            if let stringValue = value as? String {
+                                stringDict[key] = stringValue
+                            }
+                        }
+                        return stringDict
+                    }
+                }
+            }
+            
+            
+            
+            fetchAcademicAchievementData { data in
+                if let data = data {
+                    var text = "Resume\n"
+                        + "________________________________\n"
+                        + "Academic Achievements\n\n"
+                    
+                    for (index, achievement) in academicAchievements.enumerated() {
+                        if let achievementName = achievement["achievementName"],
+                           let grade = achievement["grade"],
+                           let description = achievement["description"] {
+                            text += "Achievement Name: \(achievementName)\n"
+                                + "Grade: \(grade)\n"
+                                + "Description: \(description)\n"
+                        }
+                    }
+                    
+                    text += "________________________________\n"
+                        + "Athletic Participations\n\n"
+                    
+                    for (index, participation) in athleticParticipations.enumerated() {
+                        if let sportName = participation["sportName"],
+                           let grade = participation["grade"],
+                           let description = participation["description"] {
+                            text += "Athletic Participation Name: \(sportName)\n"
+                                + "Grade: \(grade)\n"
+                                + "Description: \(description)\n"
+                        }
+                    }
+                    
+                    text += "________________________________\n"
+                        + "Performing Arts Experiences\n\n"
+                    
+                    for (index, experience) in performingArtsExperiences.enumerated() {
+                        if let experienceName = experience["performingArtsExperienceName"],
+                           let grade = experience["grade"],
+                           let description = experience["description"] {
+                            text += "Experience Name: \(experienceName)\n"
+                                + "Grade: \(grade)\n"
+                                + "Description: \(description)\n"
+                        }
+                    }
+                    // Include additional sections similarly
+                    self.frontPageText = text
+                }
+            }
+            
+            fetchClubMembershipsData { data in
+                if let data = data {
+                    var text = "________________________________\n"
+                    + "Club and Organization Memberships\n\n"
+                    
+                    for (index, achievement) in clubMemberships.enumerated() {
+                        if let achievementName = achievement["clubName"],
+                           let grade = achievement["grade"],
+                           let description = achievement["description"] {
+                            text += "Membership Name: \(achievementName)\n"
+                                + "Grade: \(grade)\n"
+                                + "Description: \(description)\n"
+                        }
+                    }
+                    
+                    text += "________________________________\n"
+                        + "Community Service Hours\n\n"
+                    
+                    for (index, participation) in communityServiceHours.enumerated() {
+                        if let sportName = participation["serviceName"],
+                           let grade = participation["grade"],
+                           let description = participation["description"] {
+                            text += "Service Name: \(sportName)\n"
+                                + "Grade: \(grade)\n"
+                                + "Description: \(description)\n"
+                        }
+                    }
+                    
+                    text += "________________________________\n"
+                        + "Honors Classes\n\n"
+                    
+                    for (index, experience) in honorsClasses.enumerated() {
+                        if let experienceName = experience["className"],
+                           let grade = experience["grade"],
+                           let description = experience["description"] {
+                            text += "Class Name: \(experienceName)\n"
+                                + "Grade: \(grade)\n"
+                                + "Description: \(description)\n"
+                        }
+                    }
+                    // Include additional sections similarly
+                    self.backPageText = text
+                }
+            }
+        }
+    }
+    
+    
+    
+    func fetchUserName() {
+        // Fetch the user's name from Firestore based on the userID
+        let userID = Auth.auth().currentUser?.uid ?? ""
+        let db = Firestore.firestore()
+        
+        db.collection("users").document(userID).getDocument { (document, error) in
+            if let document = document, document.exists {
+                // Get the user's name from the document data
+                if let name = document["name"] as? String {
+                    self.userName = name // Use 'self' to refer to the state variable
+                }
+            } else {
+                print("User document does not exist")
+            }
+        }
+    }
+    
+    func saveImages() {
+        if let frontPageImage = UIImage(named: "Blank Paper"), let backPageImage = UIImage(named: "Blank Paper Back") {
+            // Generate image with text overlay for front page
+            let combinedFrontImageWithText = generateImageWithTextOverlay(image: frontPageImage, text: frontPageText)
+            
+            // Generate image with text overlay for back page
+            let combinedBackImageWithText = generateImageWithTextOverlay(image: backPageImage, text: backPageText)
+            
+            // Present UIActivityViewController with the combined front and back images with text
+            let activityViewController = UIActivityViewController(activityItems: [combinedFrontImageWithText, combinedBackImageWithText], applicationActivities: nil)
+            UIApplication.shared.windows.first?.rootViewController?.present(activityViewController, animated: true, completion: nil)
+        }
+    }
+
+
+    func generateImageWithTextOverlay(image: UIImage, text: String) -> UIImage {
+        let imageSize = image.size
+        let scale = image.scale
+        
+        UIGraphicsBeginImageContextWithOptions(imageSize, false, scale)
+        image.draw(at: .zero)
+        
+        let textFont = UIFont.systemFont(ofSize: 24)
+        let textColor = UIColor.black
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .left // Change alignment to left
+        
+        let textAttributes: [NSAttributedString.Key: Any] = [
+            .font: textFont,
+            .foregroundColor: textColor,
+            .paragraphStyle: paragraphStyle
+        ]
+        
+        // Adjust the position and size of the text
+        let textRect = CGRect(x: 30, y: 30, width: imageSize.width - 60, height: imageSize.height - 60)
+        (text as NSString).draw(in: textRect, withAttributes: textAttributes)
+        
+        let combinedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return combinedImage ?? UIImage()
+    }
+    
+    func saveImage(image: UIImage, imageName: String) {
+        guard let data = image.pngData() else {
+            print("Failed to convert image to data")
+            return
+        }
+        
+        let fileManager = FileManager.default
+        do {
+            let documentsURL = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            let fileURL = documentsURL.appendingPathComponent(imageName)
+            try data.write(to: fileURL)
+            print("Image saved successfully at path: \(fileURL)")
+        } catch {
+            print("Error saving image: \(error.localizedDescription)")
+        }
+    }
+
+    func combineImages(frontImage: UIImage, backImage: UIImage) -> UIImage {
+        let size = CGSize(width: max(frontImage.size.width, backImage.size.width),
+                          height: frontImage.size.height + backImage.size.height)
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        frontImage.draw(in: CGRect(x: 0, y: 0, width: size.width, height: frontImage.size.height))
+        backImage.draw(in: CGRect(x: 0, y: frontImage.size.height, width: size.width, height: backImage.size.height))
+        let combinedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return combinedImage ?? UIImage()
+    }
+}
+
+func fetchAcademicAchievementData(completion: @escaping ([[String: Any]]?) -> Void) {
+    let userID = Auth.auth().currentUser?.uid ?? ""
+    let db = Firestore.firestore()
+    
+    guard !userID.isEmpty else {
+        print("User ID is empty.")
+        completion(nil)
+        return
+    }
+    
+    db.collection("usersData").document(userID).getDocument { document, error in
+        if let error = error {
+            print("Error fetching document: \(error.localizedDescription)")
+            completion(nil)
+            return
+        }
+        
+        guard let document = document, document.exists else {
+            print("Document does not exist.")
+            completion(nil)
+            return
+        }
+        
+        let data = document.data()?["academicAchievements"] as? [[String: Any]] ?? []
+        let limitedData = Array(data.prefix(1)) // Take only the first two academic achievements
+        completion(limitedData)
+    }
+}
+
+func fetchAthleticParticipationsData(completion: @escaping ([[String: Any]]?) -> Void) {
+    let userID = Auth.auth().currentUser?.uid ?? ""
+    let db = Firestore.firestore()
+    
+    guard !userID.isEmpty else {
+        print("User ID is empty.")
+        completion(nil)
+        return
+    }
+    
+    db.collection("usersData").document(userID).getDocument { document, error in
+        if let error = error {
+            print("Error fetching document: \(error.localizedDescription)")
+            completion(nil)
+            return
+        }
+        
+        guard let document = document, document.exists else {
+            print("Document does not exist.")
+            completion(nil)
+            return
+        }
+        
+        let data = document.data()?["athleticParticipations"] as? [[String: Any]] ?? []
+        let limitedData = Array(data.prefix(1))
+        completion(limitedData)
+    }
+}
+
+func fetchPerformingArtsExperiencesData(completion: @escaping ([[String: Any]]?) -> Void) {
+    let userID = Auth.auth().currentUser?.uid ?? ""
+    let db = Firestore.firestore()
+    
+    guard !userID.isEmpty else {
+        print("User ID is empty.")
+        completion(nil)
+        return
+    }
+    
+    db.collection("usersData").document(userID).getDocument { document, error in
+        if let error = error {
+            print("Error fetching document: \(error.localizedDescription)")
+            completion(nil)
+            return
+        }
+        
+        guard let document = document, document.exists else {
+            print("Document does not exist.")
+            completion(nil)
+            return
+        }
+        
+        let data = document.data()?["performingArtsExperiences"] as? [[String: Any]] ?? []
+        let limitedData = Array(data.prefix(1))
+        completion(limitedData)
+    }
+}
+
+func fetchClubMembershipsData(completion: @escaping ([[String: Any]]?) -> Void) {
+    let userID = Auth.auth().currentUser?.uid ?? ""
+    let db = Firestore.firestore()
+    
+    guard !userID.isEmpty else {
+        print("User ID is empty.")
+        completion(nil)
+        return
+    }
+    
+    db.collection("usersData").document(userID).getDocument { document, error in
+        if let error = error {
+            print("Error fetching document: \(error.localizedDescription)")
+            completion(nil)
+            return
+        }
+        
+        guard let document = document, document.exists else {
+            print("Document does not exist.")
+            completion(nil)
+            return
+        }
+        
+        let data = document.data()?["clubMemberships"] as? [[String: Any]] ?? []
+        let limitedData = Array(data.prefix(1))
+        completion(limitedData)
+    }
+}
+
+func fetchCommunityServiceHoursData(completion: @escaping ([[String: Any]]?) -> Void) {
+    let userID = Auth.auth().currentUser?.uid ?? ""
+    let db = Firestore.firestore()
+    
+    guard !userID.isEmpty else {
+        print("User ID is empty.")
+        completion(nil)
+        return
+    }
+    
+    db.collection("usersData").document(userID).getDocument { document, error in
+        if let error = error {
+            print("Error fetching document: \(error.localizedDescription)")
+            completion(nil)
+            return
+        }
+        
+        guard let document = document, document.exists else {
+            print("Document does not exist.")
+            completion(nil)
+            return
+        }
+        
+        let data = document.data()?["communityServiceHours"] as? [[String: Any]] ?? []
+        let limitedData = Array(data.prefix(1))
+        completion(limitedData)
+    }
+}
+
+func fetchHonorsClassesData(completion: @escaping ([[String: Any]]?) -> Void) {
+    let userID = Auth.auth().currentUser?.uid ?? ""
+    let db = Firestore.firestore()
+    
+    guard !userID.isEmpty else {
+        print("User ID is empty.")
+        completion(nil)
+        return
+    }
+    
+    db.collection("usersData").document(userID).getDocument { document, error in
+        if let error = error {
+            print("Error fetching document: \(error.localizedDescription)")
+            completion(nil)
+            return
+        }
+        
+        guard let document = document, document.exists else {
+            print("Document does not exist.")
+            completion(nil)
+            return
+        }
+        
+        let data = document.data()?["honorsClasses"] as? [[String: Any]] ?? []
+        let limitedData = Array(data.prefix(1))
+        completion(limitedData)
+    }
+}
+
+struct ResumeBuilderPage_Previews: PreviewProvider {
+    static var previews: some View {
+        ResumeBuilderPage()
+    }
+}
