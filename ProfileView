@@ -1,0 +1,238 @@
+//
+//  ProfileView.swift
+//  MobileAppDevelopment#2
+//
+//  Created by Anvit Vemuri on 4/8/24.
+
+import SwiftUI
+import FirebaseFirestore
+
+@MainActor
+final class ProfileViewModel: ObservableObject {
+    
+    
+    @Published private(set) var user: DBUser? = nil
+    
+    func loadCurrentUser() async throws {
+        let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
+        self.user = try await UserManager.shared.getUser(userId: authDataResult.uid)
+    }
+    
+}
+
+struct ProfileView: View {
+    
+    @StateObject private var viewModel = ProfileViewModel()
+    @Binding var showSignInView: Bool
+    @State private var goToAcademicAchievements = false // Track navigation state
+    @State private var name = ""
+    @State private var selectedSchoolIndex = 0
+    @State private var school = ""
+    @State private var graduationYear = 2025
+    @State private var showAlert = false
+    @State private var errorMessage = ""
+    @State private var successMessage = ""
+    @State private var navigateToContentView = false
+    @State private var schools: [String] = []
+
+    var body: some View {
+        VStack {
+            List {
+                if let user = viewModel.user {
+                    //Text("UserID: \(user.userId)")
+                }
+            }
+            .task {
+                try? await viewModel.loadCurrentUser()
+            }
+            //.navigationTitle("Profile")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack {
+                        Text("Settings:")
+                            .font(.title3)
+                            .foregroundColor(.black)
+                        
+                        NavigationLink {
+                            SettingsView(showSignInView: $showSignInView)
+                        } label: {
+                            Image(systemName: "gear")
+                                .font(.headline)
+                        }
+
+                    }
+                }
+            }
+            
+            Spacer()
+            
+            VStack {
+                HStack {
+                    Text("Note: If this is a new account or if you would like to update your name, school, or graduation year, type in the information and click 'Complete Account Registration'. If you do not wish to make any changes, click on 'Go To Home Page Directly' and you will be directed to the home page. Administrators can also click on 'Go To Home Page Directly'.")
+                        .font(.subheadline)
+                        .multilineTextAlignment(.leading)
+                        .padding(10)
+                        .frame(width: 360, height: 180)
+                        .background(.red)
+                        .cornerRadius(10)
+                        .foregroundColor(.black)
+                }
+                
+                Text("Please enter your name, the school you currently attend, and graduation year to complete creating your account!")
+                    .font(.title3)
+                    .multilineTextAlignment(.center)
+                    .padding(10)
+                    .frame(width: 375, height: 110)
+                    .background(Color.blue)
+                    .cornerRadius(15)
+                    .foregroundColor(.white)
+                
+                TextField("Name", text: $name)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+                
+                HStack {
+                    Spacer()
+                    Text("School:")
+                    HStack {
+                        if !schools.isEmpty {
+                            Picker("School", selection: $selectedSchoolIndex) {
+                                ForEach(0..<schools.count, id: \.self) { index in
+                                    Text(self.schools[index])
+                                }
+                            }
+                            .pickerStyle(DefaultPickerStyle())
+                            .padding()
+                        } else {
+                            Text("Loading schools...")
+                        }
+                    }
+                    .frame(width: 250, height: 50)
+                    Spacer()
+                }
+                
+                HStack {
+                    Text("Graduation Year:")
+                    
+                    Picker("", selection: $graduationYear) {
+                        ForEach(2025..<2041, id: \.self) { year in
+                            Text(String(year)).tag(year)
+                        }
+                    }
+                    .pickerStyle(WheelPickerStyle())
+                }
+                .padding()
+                .frame(width: 350, height: 125)
+                .background(Color.white)
+                .cornerRadius(10)
+                .padding(.horizontal)
+                
+                Button(action: {
+                    saveUserInfo()
+                }) {
+                    Text("Complete Account Registration!")
+                        .foregroundColor(.black)
+                        .font(.title2)
+                        .padding()
+                        .frame(width: 335, height: 60)
+                        .background(Color.green)
+                        .cornerRadius(10)
+                }
+                .padding(.top)
+                NavigationLink(destination: ContentView() ) {
+                    Text("I Already Have An Account!")
+                        .foregroundColor(.black)
+                        .font(.title2)
+                        .padding()
+                        .frame(width: 335, height: 60)
+                        .background(Color.yellow)
+                        .cornerRadius(10)
+                }
+            }
+            .alert(isPresented: $showAlert) {
+                if errorMessage.isEmpty {
+                    return Alert(title: Text("Success"), message: Text(successMessage), dismissButton: .default(Text("OK")) {
+                        // Navigate to ContentView
+                        navigateToContentView = true
+                    })
+                } else {
+                    return Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+                }
+            }
+            .fullScreenCover(isPresented: $navigateToContentView) {
+                ContentView()
+            }
+            
+            Spacer()
+    }
+        .onAppear {
+            // Fetch schools from Firestore
+            fetchSchoolsFromFirestore()
+        }
+    }
+
+    // Function to fetch schools from Firestore
+    func fetchSchoolsFromFirestore() {
+        let db = Firestore.firestore()
+        let schoolsCollection = db.collection("schools")
+
+        schoolsCollection.getDocuments { (querySnapshot, error) in
+            if let error = error {
+                print("Error fetching schools: \(error.localizedDescription)")
+                return
+            }
+
+            guard let documents = querySnapshot?.documents else {
+                print("No documents in 'schools' collection")
+                return
+            }
+
+            // Populate schools array with document IDs
+            self.schools = documents.map { $0.documentID }
+            print("Fetched schools: \(self.schools)")
+        }
+    }
+    
+    
+    private func saveUserInfo() {
+        if name.isEmpty {
+            errorMessage = "Name is required."
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                showAlert.toggle()
+            }
+            return
+        }
+        
+        guard let user = viewModel.user else {
+            // Handle case where user is not loaded
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(user.userId)
+        userRef.updateData([
+            "name": name,
+            "school": schools[selectedSchoolIndex],
+            "graduationYear": graduationYear
+        ]) { err in
+            if let err = err {
+                print("Error updating document: \(err)")
+                errorMessage = "Failed to save user information."
+            } else {
+                successMessage = "Account registration is complete."
+                errorMessage = "" // Clear any previous error message
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                showAlert.toggle()
+            }
+        }
+    }
+}
+
+#Preview {
+    NavigationStack {
+        ProfileView(showSignInView: .constant(false))
+    }
+}
