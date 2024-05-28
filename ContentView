@@ -1,0 +1,119 @@
+//
+//  ContentView.swift
+//  MobileApplicationDevelopment
+//
+//  Created by Anvit Vemuri on 3/21/24.
+//
+
+import SwiftUI
+import Firebase
+
+// Define ContentView
+struct ContentView: View {
+    // State variables to track user ID and isAdmin status
+    @State private var userID: String = ""
+    @State private var navigateToResumeBuilderPage = false // State variable to control navigation to ResumeBuilderPage
+    @State private var navigateToReportBugPage = false // State variable to control navigation to ReportBugPage
+
+    var body: some View {
+        NavigationView {
+            ZStack {
+                Color(.systemMint)
+                    .ignoresSafeArea()
+                
+                VStack {
+                    HStack {
+                        Spacer()
+                        Text("Welcome!\n Please Log In")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                        NavigationLink(destination: FAQPage()) {
+                            Image("FAQQuestionMark")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .cornerRadius(15)
+                                .frame(width: 60)
+                                .padding(10)
+                        }
+                    }
+                    Image("HomePageReportCard")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .cornerRadius(15)
+                        .padding(.all)
+                    VStack {
+                        
+                    }
+                    HStack {
+                        Spacer()
+                        // Student Button
+                        NavigationLink(destination: MainSelectionScreen(), isActive: $navigateToResumeBuilderPage) {
+                            Button(action: {
+                                // Set isAdmin to false
+                                addUserToFirestore(isAdmin: false)
+                                navigateToResumeBuilderPage = true // Navigate to ResumeBuilderPage
+                            }) {
+                                Text("Student")
+                                    .font(.title)
+                                    .foregroundColor(.blue)
+                                    .frame(width: 175, height: 75)
+                                    .background(Color.yellow)
+                                    .cornerRadius(15)
+                            }
+                        }
+                        
+                        Spacer()
+                        // Administrator Button
+                        NavigationLink(destination: AdminDirectoryPage(), isActive: $navigateToReportBugPage) {
+                            Button(action: {
+                                // Set isAdmin to true
+                                addUserToFirestore(isAdmin: true)
+                                navigateToReportBugPage = true // Navigate to ReportBugPage
+                            }) {
+                                Text("Administrator")
+                                    .font(.title)
+                                    .foregroundColor(.blue)
+                                    .frame(width: 175, height: 75)
+                                    .background(Color.yellow)
+                                    .cornerRadius(15)
+                            }
+                        }
+                        
+                        Spacer()
+                    }
+                    Spacer()
+                }
+            }
+        }
+        .onAppear {
+            // Fetch user ID using Firebase Auth
+            if let user = Auth.auth().currentUser {
+                self.userID = user.uid
+            } else {
+                // User is not signed in
+                print("No user signed in.")
+            }
+        }
+    }
+
+    // Function to add user to Firestore with isAdmin field
+    private func addUserToFirestore(isAdmin: Bool) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(userID)
+        userRef.setData(["isAdmin": isAdmin], merge: true) { error in
+            if let error = error {
+                print("Error adding user: \(error)")
+            } else {
+                print("User added successfully.")
+            }
+        }
+    }
+}
+
+
+#Preview {
+    ContentView()
+}
