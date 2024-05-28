@@ -1,0 +1,207 @@
+//
+//  AdminDirectoryPage.swift
+//  MobileAppDevelopment#2
+//
+//  Created by Anvit Vemuri on 4/23/24.
+//
+
+import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
+
+struct AdminDirectoryPage: View {
+    let db = Firestore.firestore()
+    
+    @State private var currentUserSchool: String = ""
+    @State private var usersInSameSchool: [(name: String, userID: String)] = [] // Change to store both name and userID
+    @State private var currentUserDisplayName: String = ""
+    @State private var enteredPassword: String = ""
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    @State private var navigateToContentView = false
+    @State private var selectedUserIndex = 0
+    @State private var selectedUserID = "" // New state to store selected user's ID
+    
+    var body: some View {
+        NavigationView {
+            ZStack {
+                Color(.systemMint)
+                    .ignoresSafeArea()
+                
+                VStack {
+                    Text("This page allows administrators to view & edit students' portfolios.")
+                        .font(.largeTitle)
+                        .foregroundColor(.blue)
+                        .frame(width: 375, height: 160)
+                        .background(.white)
+                        .multilineTextAlignment(.center)
+                        .cornerRadius(15)
+                    
+                    Text("To enter into a student's account, simply select the student from the dropdown menu and enter the administrator password for your specific school.")
+                        .font(.title2)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white)
+                        .frame(width: 360, height: 150)
+                        .background(.blue)
+                        .cornerRadius(10)
+                    
+                    HStack {
+                        Text("Select Student:")
+                            .frame(width: 125, height: 50)
+                            .background(.yellow)
+                            .cornerRadius(10)
+                            .frame(width: 200, height: 50)
+                            .padding()
+                        Spacer()
+                        HStack {
+                            if !usersInSameSchool.isEmpty {
+                                Picker("Select a student", selection: $selectedUserIndex) {
+                                    ForEach(usersInSameSchool.indices, id: \.self) { index in
+                                        Text(usersInSameSchool[index].name)
+                                    }
+                                }
+                                .pickerStyle(MenuPickerStyle())
+                                .frame(height: 50)
+                                .background(Color.white)
+                                .cornerRadius(10)
+                                .padding()
+                            }
+                            Spacer()
+                        }
+                    }
+                    
+                    TextField("Enter Password", text: $enteredPassword)
+                        .padding()
+                        .frame(width: 250, height: 50)
+                        .background(Color.white)
+                        .cornerRadius(15)
+                        .multilineTextAlignment(.center)
+                    
+                    Button("Enter", action: verifyPassword)
+                        .padding()
+                        .frame(width: 200, height: 50)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                
+            }
+            .onAppear {
+                fetchCurrentUserSchool()
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Password Verification"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK")) {
+                        if alertMessage == "Success" {
+                            navigateToContentView = true
+                        }
+                    }
+                )
+            }
+            .navigationBarTitle("")
+            .navigationBarHidden(true)
+            .background(
+                NavigationLink(
+                    destination: AdminEditingPage(selectedUserID: selectedUserID),
+                    isActive: $navigateToContentView,
+                    label: {
+                        EmptyView()
+                    }
+                )
+            )
+        }
+    }
+    
+    private func fetchCurrentUserSchool() {
+        if let currentUserID = Auth.auth().currentUser?.uid {
+            db.collection("users").document(currentUserID).getDocument { document, error in
+                if let error = error {
+                    print("Error fetching user's school: \(error.localizedDescription)")
+                } else if let document = document, document.exists {
+                    if let school = document.data()?["school"] as? String {
+                        self.currentUserSchool = school
+                        self.currentUserDisplayName = document.data()?["name"] as? String ?? ""
+                        fetchUsersInSameSchool()
+                    }
+                } else {
+                    print("Error: Current user document does not exist.")
+                }
+            }
+        } else {
+            print("Error: Current user is not authenticated.")
+        }
+    }
+    
+    private func fetchUsersInSameSchool() {
+        db.collection("users").whereField("school", isEqualTo: currentUserSchool).whereField("isAdmin", isEqualTo: false).getDocuments { querySnapshot, error in
+            if let error = error {
+                print("Error fetching users in the same school: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let snapshot = querySnapshot else {
+                print("Error: Query snapshot is nil.")
+                return
+            }
+            
+            var users: [(name: String, userID: String)] = []
+            for document in snapshot.documents {
+                guard let userData = document.data() as? [String: Any] else {
+                    print("Error: Document data is not in the expected format.")
+                    continue
+                }
+                
+                if let name = userData["name"] as? String,
+                   let userID = userData["user_id"] as? String { // Assuming user_id is the field name for unique user ID
+                    users.append((name: name, userID: userID))
+                } else {
+                    print("Error: Name field or user_id field is missing or not a String.")
+                }
+            }
+            
+            self.usersInSameSchool = users
+        }
+    }
+    
+    
+    private func verifyPassword() {
+        db.collection("schools").document(currentUserSchool).getDocument { document, error in
+            if let error = error {
+                alertMessage = "Error fetching school document: \(error.localizedDescription)"
+                showAlert = true
+            } else if let document = document, document.exists {
+                guard let password = document.data()?["password"] as? String else {
+                    alertMessage = "Error: Password field is missing or not a String."
+                    showAlert = true
+                    return
+                }
+                if enteredPassword == password {
+                    if selectedUserIndex < usersInSameSchool.count {
+                        selectedUserID = usersInSameSchool[selectedUserIndex].userID // Access userID from tuple
+                        showAlert = true
+                        alertMessage = "Success! You can now view the student's portfolio."
+                        navigateToContentView = true
+                    } else {
+                        showAlert = true
+                        alertMessage = "Error: Selected user not found."
+                    }
+                } else {
+                    showAlert = true
+                    alertMessage = "The password you entered is incorrect. Please try again."
+                }
+            } else {
+                alertMessage = "Error: School document does not exist."
+                showAlert = true
+            }
+        }
+    }
+}
+
+
+struct AdminDirectoryPage_Previews: PreviewProvider {
+    static var previews: some View {
+        AdminDirectoryPage()
+    }
+}
