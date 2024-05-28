@@ -1,0 +1,166 @@
+//  MainSelectionScreen.swift
+//  MobileAppDevelopment#2
+//
+//  Created by Anvit Vemuri on 4/14/24.
+//
+
+import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
+
+struct MainSelectionScreen: View {
+    @State private var userName = "" // State variable to hold user's name
+    
+    var body: some View {
+        ZStack {
+            Color(.systemMint)
+                .ignoresSafeArea()
+            VStack(spacing: 20) {
+                Spacer()
+                Text("Select the button for the portion of your portfolio you would like to update")
+                    .font(.largeTitle)
+                    .multilineTextAlignment(.center)
+                    .padding(10)
+                    .frame(width: 375, height: 150)
+                    .background(Color.blue)
+                    .cornerRadius(15)
+                    .foregroundColor(.white)
+                
+                HStack {
+                    Text("Name: \(userName)") // Display user's name
+                        .padding()
+                    Spacer()
+                }
+                
+                // Navigation links for different sections
+                HStack {
+                    Spacer()
+                    
+                    NavigationLink(destination: AcademicAchievementsPage()) {
+                        Text("Academic Achievements")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 170, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    
+                    Spacer()
+                    
+                    NavigationLink(destination: AthleticParticipationPage()) {
+                        Text("Athletic Participation")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 170, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    Spacer()
+                }
+                
+                HStack {
+                    Spacer()
+                    
+                    NavigationLink(destination: PerformingArtsExperiencePage()) {
+                        Text("Performing Arts Experience")
+                            .foregroundColor(.blue)
+                            .font(.title3)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 170.004, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    
+                    Spacer()
+                    
+                    NavigationLink(destination: ClubsAndOrganizationMembershipsPage()) {
+                        Text("Clubs and Organizations")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 170, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    Spacer()
+                }
+                
+                HStack {
+                    Spacer()
+                    NavigationLink(destination: CommunityServiceHoursPage()) {
+                        Text("Community Service Hours")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 170, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    
+                    Spacer()
+                    
+                    NavigationLink(destination: HonorsClassesPage()) {
+                        Text("Honors       Classes")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .frame(width: 170, height: 100)
+                            .background(Color.yellow)
+                            .cornerRadius(10)
+                    }
+                    Spacer()
+                }
+                
+                Spacer()
+                
+                NavigationLink(destination: FinalStatsManager()) {
+                    Text("Show Final Stats")
+                        .foregroundColor(.white)
+                        .font(.title)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                        .frame(width: 240, height: 75)
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                }
+                    
+                Spacer()
+            }
+        }
+        .onAppear {
+            fetchUserName() // Fetch the user's name when the view appears
+        }
+    }
+    
+    func fetchUserName() {
+        // Fetch the user's name from Firestore based on the userID
+        let userID = Auth.auth().currentUser?.uid ?? ""
+        let db = Firestore.firestore()
+        
+        db.collection("users").document(userID).getDocument { (document, error) in
+            if let document = document, document.exists {
+                // Get the user's name from the document data
+                if let name = document["name"] as? String {
+                    self.userName = name // Use 'self' to refer to the state variable
+                }
+            } else {
+                print("User document does not exist")
+            }
+        }
+    }
+}
+
+// Preview
+struct MainSelectionScreen_Previews: PreviewProvider {
+    static var previews: some View {
+        MainSelectionScreen()
+    }
+}
