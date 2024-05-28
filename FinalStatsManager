@@ -1,0 +1,147 @@
+//
+//  FinalStatsManager.swift
+//  MobileAppDevelopment#2
+//
+//  Created by Anvit Vemuri on 4/17/24.
+//
+
+import SwiftUI
+
+struct FinalStatsManager: View {
+    var body: some View {
+
+            ZStack {
+                Color(.systemMint)
+                    .ignoresSafeArea()
+                
+                VStack {
+                    Spacer()
+                    
+                    Text("This page allows you to select the contents of the category that you would like to view or edit. Simply click on the button to see the specific section you would like to view/edit.")
+                        .font(.title2)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white)
+                        .frame(width: 370, height: 200)
+                        .background(.blue)
+                        .cornerRadius(20)
+                    
+                    
+                    HStack {
+                        Spacer()
+                        
+                        NavigationLink(destination: FinalStatsAA()) {
+                            Text("Academic Achievements")
+                                .foregroundColor(.blue)
+                                .font(.title2)
+                                .multilineTextAlignment(.center)
+                                .padding()
+                                .frame(width: 170, height: 100)
+                                .background(Color.yellow)
+                                .cornerRadius(10)
+                        }
+
+
+                        Spacer()
+                        
+                        NavigationLink(destination: FinalStatsAP() ) {
+                            Text("Athletic Participation")
+                                .foregroundColor(.blue)
+                                .font(.title2)
+                                .multilineTextAlignment(.center)
+                                .padding()
+                                .frame(width: 170, height: 100)
+                                .background(Color.yellow)
+                                .cornerRadius(10)
+                        }
+                        Spacer()
+                    }
+                    
+                    HStack {
+                        Spacer()
+                        
+                        NavigationLink(destination: FinalStatsPAE() ) {
+                            Text("Performing Arts Experience")
+                                .foregroundColor(.blue)
+                                .font(.title3)
+                                .multilineTextAlignment(.center)
+                                .padding()
+                                .frame(width: 171, height: 100)
+                                .background(Color.yellow)
+                                .cornerRadius(10)
+                        }
+                        
+                        Spacer()
+                        
+                        NavigationLink(destination: FinalStatsCAO() ) {
+                            Text("Clubs and Organizations")
+                                .foregroundColor(.blue)
+                                .font(.title2)
+                                .multilineTextAlignment(.center)
+                                .padding()
+                                .frame(width: 170, height: 100)
+                                .background(Color.yellow)
+                                .cornerRadius(10)
+                        }
+                        Spacer()
+                    }
+                    
+                    HStack {
+                        Spacer()
+                        NavigationLink(destination: FinalStatsCSH() ) {
+                            Text("Community Service Hours")
+                                .foregroundColor(.blue)
+                                .font(.title2)
+                                .multilineTextAlignment(.center)
+                                .padding()
+                                .frame(width: 170, height: 100)
+                                .background(Color.yellow)
+                                .cornerRadius(10)
+                        }
+                        
+                        Spacer()
+                        
+                        NavigationLink(destination: FinalStatsHC() ) {
+                            Text("Honors       Classes")
+                                .foregroundColor(.blue)
+                                .font(.title2)
+                                .multilineTextAlignment(.center)
+                                .padding()
+                                .frame(width: 170, height: 100)
+                                .background(Color.yellow)
+                                .cornerRadius(10)
+                        }
+                        Spacer()
+                    }
+                    Spacer()
+                
+                        Text("Click on the button below to be directed to a page that allows you to create your own resume!")
+                            .font(.title2)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.blue)
+                            .frame(width: 370, height: 100)
+                            .background(.white)
+                            .cornerRadius(15)
+                
+                    Spacer()
+                    NavigationLink(destination: ResumeBuilderPage() ) {
+                        Text("Go to Resume Builder")
+                            .font(.title)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.white)
+                            .frame(width: 275, height: 50)
+                            .background(.red)
+                            .cornerRadius(20)
+                    }
+
+                    }
+                        
+                    Spacer()
+                
+            }
+        }
+    }
+
+
+#Preview {
+    FinalStatsManager()
+}
