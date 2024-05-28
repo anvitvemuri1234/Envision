@@ -1,0 +1,31 @@
+//
+//  MobileAppDevelopment_2App.swift
+//  MobileAppDevelopment#2
+//
+//  Created by Anvit Vemuri on 3/29/24.
+//
+
+import SwiftUI
+import Firebase
+
+@main
+struct MobileAppDevelopment_2App: App {
+    
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
+    var body: some Scene {
+        WindowGroup {
+            RootView()
+        }
+    }
+}
+
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+  func application(_ application: UIApplication,
+                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    FirebaseApp.configure()
+
+    return true
+  }
+}
