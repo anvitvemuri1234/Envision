@@ -1,65 +1,58 @@
-Envision Copyright Compliance
-Introduction
-This document outlines the copyright compliance for the Envision Portfolio Creator. It includes details on the proper usage and licensing of third-party materials, as well as guidelines for contributing to the project. This compliance form ensures that all content used within the project is legally sourced and appropriately credited.
+# Copyright Compliance
 
-Project Overview
-HS Portfolio Creator is a mobile and web application designed to help high school students track and manage their extracurricular activities, generate comprehensive portfolios, and plan for college applications. The app is developed using Swift for iOS, Kotlin for Android, React for the web application, and Firebase for backend services.
+**Effective Date: 6/20/2024**
 
-Licensing
-The HS Portfolio Creator app is licensed under the MIT License. This allows for broad use, modification, and distribution of the software, provided that the original copyright notice and permission notice are included in all copies or substantial portions of the software.
+## 1. Introduction
+This document serves to acknowledge and comply with the copyright requirements for all external materials and tools utilized in the development of the Envision app. We respect the intellectual property rights of others and have ensured that all external materials used are properly cited and used in accordance with their respective licenses.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+## 2. Tools and Technologies Used
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+### 2.1 Firebase
+Firebase is a comprehensive app development platform provided by Google. We used Firebase for data storage and real-time database management. Firebase employs industry-standard security measures to protect user data.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-Use of Third-Party Materials
-The HS Portfolio Creator app may include third-party libraries, icons, and other assets. It is essential to comply with the licenses of these third-party materials. Below are the guidelines for including third-party materials in the project:
+- **Firebase Documentation:** [Firebase Documentation](https://firebase.google.com/docs)
+- **License:** Firebase is governed by the Google Cloud Platform Terms of Service, available at [Google Cloud Platform Terms of Service](https://cloud.google.com/terms).
 
-Library Inclusion:
+### 2.2 Swift
+Swift is a powerful and intuitive programming language for iOS, macOS, watchOS, and tvOS developed by Apple. We used Swift to develop the final version of the Envision app.
 
-Any third-party libraries included in the project must be open-source and compatible with the MIT License.
-The license files for these libraries must be included in the repository.
-Credit must be given to the authors of the third-party libraries in the README file.
-Icons and Graphics:
+- **Swift Documentation:** [Swift Documentation](https://swift.org/documentation/)
+- **License:** Swift is an open-source project and is licensed under the Apache License 2.0, available at [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
-All icons and graphics used in the project must either be created by the project team or sourced from platforms that provide assets under licenses compatible with the MIT License.
-Proper attribution must be given for all third-party icons and graphics used in the project.
-Attribution:
+### 2.3 Xcode
+Xcode is Apple’s integrated development environment (IDE) for macOS, used for developing software for macOS, iOS, iPadOS, watchOS, and tvOS. We used Xcode to build and debug our Swift code.
 
-All third-party materials included in the project must be listed in the attribution section of the README file.
-The attribution should include the name of the material, the author, and the license under which it is used.
-Contributing to the Project
-Contributors to the HS Portfolio Creator project must adhere to the following guidelines:
+- **Xcode Documentation:** [Xcode Documentation](https://developer.apple.com/documentation/xcode)
+- **License:** Xcode is subject to the Apple Developer Program License Agreement, available at [Apple Developer Program License Agreement](https://developer.apple.com/programs/terms/).
 
-Original Work:
+### 2.4 Figma
+Figma is a web-based interface design tool. We used Figma to create wireframes and design the user interface for the Envision app.
 
-Contributions must be original work or properly licensed third-party materials.
-Contributors must not include any content that infringes on the intellectual property rights of others.
-License Agreement:
+- **Figma Documentation:** [Figma Documentation](https://help.figma.com/hc/en-us)
+- **License:** Figma’s use is governed by its Terms of Service, available at [Figma Terms of Service](https://www.figma.com/terms-of-service/).
 
-By contributing to the project, contributors agree to license their contributions under the MIT License.
-Contributors must include a statement in their pull requests confirming that they agree to license their contributions under the MIT License.
-Attribution:
+### 2.5 Code.org
+Code.org is a non-profit organization that provides resources for learning computer science. We used Code.org to develop a high-fidelity prototype of the Envision app.
 
-Contributors must provide proper attribution for any third-party materials included in their contributions.
-The attribution should be added to the appropriate section of the README file.
-Attribution
-The following third-party materials are used in the HS Portfolio Creator project:
+- **Code.org Documentation:** [Code.org Documentation](https://code.org/about/inspire)
+- **License:** Code.org materials are subject to its Terms of Service, available at [Code.org Terms of Service](https://code.org/tos).
 
-Firebase:
+## 3. Original Graphics
+All graphics used in the Envision app, including icons and illustrations, are entirely original. These graphics were created specifically for the Envision app and are the intellectual property of the Envision development team.
 
-Author: Google
-License: Apache License 2.0
+## 4. Compliance Acknowledgment
+By using the Envision app, you acknowledge and agree that:
+- The Envision development team has made every effort to comply with all copyright laws and licensing agreements associated with the external materials and tools used.
+- All third-party materials and tools are cited appropriately and used in accordance with their respective licenses.
+- The original graphics created for the Envision app are protected by copyright and cannot be used without permission from the Envision development team.
 
-Author: Apple
-License: Apple Software License Agreement
+## 5. Contact Information
+If you have any questions or concerns about our copyright compliance or the use of external materials in the Envision app, please contact us at:
+- **Email:** maxjscharf@gmail.com 
 
+## 6. Changes to This Document
+We may update this Copyright Compliance document from time to time in order to reflect changes in our practices or for other operational, legal, or regulatory reasons. We will notify you of any changes by posting the new document on this page. You are advised to review this document periodically for any changes. Changes to this document are effective when they are posted on this page.
 
+---
 
-Author: Anvit Vemuri & Max Scharf
-Contact: anvit.vemuri@gmail.com, maxjscharf@gmail.com
-For any questions or concerns regarding copyright compliance, please contact the project maintainers at [email@example.com].
-
-Conclusion
-By following this copyright compliance form, the HS Portfolio Creator project ensures that all materials used are legally sourced and appropriately credited. This compliance fosters a respectful and legally sound development environment.
+This document is designed to ensure transparency and compliance with all copyright and licensing requirements. Adjust the placeholders with your specific information as needed.
