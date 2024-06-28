@@ -1,15 +1,25 @@
-HS_Portfolio_Creator
-About:
-The HS Portfolio Creator program is a mobile app intended to allow students of a certain High School to log the activities that they participate in. It can be accessed both through the web and as a mobile application.
+# Introduction
+Envision is an innovative mobile application designed to assist high school students in documenting their extracurricular activities. The app serves as a digital portfolio, enabling students to log, manage, and share their achievements. It is available on both web and mobile platforms, providing flexibility and convenience for all users.
 
-Student functionality:
-Students can use a designated passkey (Note: All passkeys are set to "1234" for testing) to log in to their acount for privacy purposes. From there, they can input and describe activities that they have participated in under six different categories. This data is stored dynamically through a cloud based dataset. Finaly, they are able to view a final portfolio report for each category of activity, which can be uploaded to both Instagram and LinkedIn.
+## Student Functionality
+Students can log in to their accounts using a designated passkey, which is set to "1234" for testing purposes. Once logged in, they can input and describe activities they have participated in under six different categories: Academic Achievements, Sports, Arts, Volunteering, Clubs, and Miscellaneous. All data is stored dynamically through a cloud-based dataset, ensuring it is secure and accessible from any device.
 
-Administrator functionality:
-Using another passkey (presently "1234"), Administrators can view and edit the portfolios of all students to ensure truthfullness and monitor student progress.
+The app generates comprehensive portfolio reports for each category of activity. These reports can be viewed and downloaded, and students can upload them directly to Instagram and LinkedIn, showcasing their achievements to a broader audience.
 
-Help Section:
-Clicking on the ? icon on the homepage brings the user to a FAQ page, where they are able to learn more info about the app as well report any bugs they find.
+## Administrator Functionality
+Administrators have secure access using a separate passkey (currently "1234"). They can view and edit the portfolios of all students, ensuring the accuracy of the information and monitoring student progress effectively.
 
-Running the app:
-The app is avaiable for download on the app store. 
+## Technical Details
+HS Portfolio Creator is available as a mobile app on iOS and Android, and as a web application. The backend utilizes Firebase Firestore for dynamic and secure data storage, while the frontend is built using SwiftUI for iOS, Kotlin for Android, and React for the web application. Authentication is managed through Firebase Authentication to ensure secure login processes for both students and administrators.
+
+## Help and Support
+For assistance, users can access a dedicated FAQ page by clicking on the "FAQ" icon on the homepage. This page provides detailed information about using the app and troubleshooting common issues. Additionally, users can report any bugs or issues they encounter through the FAQ page, which is valuable for improving the app.
+
+### Installation and Running the App
+To install Envision, download it from the App Store (iOS). Follow the standard installation process for your device. After installation, sign in with google, apple, or email. In addition, you can sign in anonymously.
+
+### Contributing
+We welcome contributions to improve the HS Portfolio Creator app. To contribute, fork the repository, create a new branch for your feature or bugfix, commit your changes, and push your branch to your fork. Then, create a pull request with a detailed description of your changes.
+
+### License
+The HS Portfolio Creator app is licensed under the MIT License. For more details, please refer to the LICENSE file in the repository.
