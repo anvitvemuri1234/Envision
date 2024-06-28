@@ -1,0 +1,644 @@
+import SwiftUI
+import Firebase
+
+struct CollegeCalculatorPage: View {
+    @State private var showSignInView = false
+    @State private var isChecked: Bool = false
+    
+    @State private var selectedSATScore = 400
+    @State private var selectedACTScore = 1
+    @State private var selectedGPA = 1.00
+
+    @State private var academicAchievements: [Achievement1] = []
+    @State private var athleticParticipations: [Participation1] = []
+    @State private var performingArtsExperiences: [Achievement2] = []
+    @State private var clubMemberships: [Participation2] = []
+    @State private var communityServiceHours: [Participation3] = []
+    @State private var honorsClasses: [Participation4] = []
+    
+    struct Achievement1 {
+        var name: String
+        var grade: String
+        var description: String
+        var isEditing: Bool = false
+    }
+    
+    struct Participation1 {
+        var sportName: String
+        var grade: String
+        var description: String
+        var isEditing: Bool = false
+    }
+    
+    struct Achievement2 {
+        var name: String
+        var grade: String
+        var description: String
+        var isEditing: Bool = false
+    }
+    
+    struct Participation2 {
+        var clubName: String
+        var grade: String
+        var description: String
+        var isEditing: Bool = false
+    }
+    
+    struct Participation3 {
+        var clubName: String
+        var grade: String
+        var description: String
+        var isEditing: Bool = false
+    }
+    
+    struct Participation4 {
+        var clubName: String
+        var grade: String
+        var description: String
+        var isEditing: Bool = false
+    }
+    
+    
+    @State private var SATCalculatedScore = 1
+    @State private var ACTCalculatedScore = 1
+    @State private var GPACalculatedScore = 1
+    
+    @State private var colleges: [College] = []
+    @State private var selectedCollege: College?
+    @State private var admissionProbability: String = ""
+    @State private var improvementSuggestion: String? = nil
+    @State private var improvementSuggestionLink: String? = nil
+    @State private var userName = ""
+    
+    let db = Firestore.firestore()
+    let userID = Auth.auth().currentUser?.uid ?? ""
+
+    let satScores = Array(stride(from: 400, through: 1600, by: 10))
+    let actScores = Array(1...36)
+    let gpas = Array(stride(from: 1.00, through: 4.00, by: 0.05))
+
+    // Computed property to sum the counts
+    private var totalCount: Int {
+        return academicAchievements.count + athleticParticipations.count + performingArtsExperiences.count + clubMemberships.count + communityServiceHours.count + honorsClasses.count
+    }
+    
+    private var finalScore: Int {
+        let maxStandardizedScore = max(SATCalculatedScore, ACTCalculatedScore)
+        return totalCount + GPACalculatedScore + maxStandardizedScore
+    }
+
+    // Function to find the lowest score and its category
+    private var lowestScore: (category: String, score: Int)? {
+        let maxStandardizedScore = max(SATCalculatedScore, ACTCalculatedScore)
+        let scores = [
+            ("Academic Achievements", academicAchievements.count),
+            ("Athletic Participation", athleticParticipations.count),
+            ("Performing Arts Experience", performingArtsExperiences.count),
+            ("Clubs and Organizations", clubMemberships.count),
+            ("Community Service Hours", communityServiceHours.count - 1),
+            ("Honors Classes", honorsClasses.count),
+            ("GPA", GPACalculatedScore)
+        ]
+        
+        let filteredScores = isChecked ? scores : scores + [("Standardized Test Scores", maxStandardizedScore-5)]
+        
+        return filteredScores.min { $0.1 < $1.1 }
+    }
+
+    var body: some View {
+        ZStack {
+            Color(.systemMint)
+                .ignoresSafeArea()
+            
+            ScrollView {
+                HStack {
+                    Text("Name: \(userName)") // Display user's name
+                        .padding()
+                    Spacer()
+                }
+                VStack(spacing: 20) {
+                    
+                    Text("College Admissions Calculator")
+                        .font(.largeTitle)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.blue)
+                        .frame(width: 375, height: 100)
+                        .background(Color.white)
+                        .cornerRadius(20)
+                    
+                    Text("*This calculator is not 100% accurate. Many other factors are considered in the college application process.")
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.red)
+                        .frame(width: 375, height: 75)
+                        .background(Color.white)
+                        .cornerRadius(20)
+                    
+                    
+                    
+                    HStack {
+                        Text("Test Optional: ")
+                            .font(.headline)
+                        
+                        Button(action: {
+                            self.isChecked.toggle()
+                        }) {
+                            Image(systemName: isChecked ? "checkmark.square" : "square")
+                                .foregroundColor(isChecked ? .red : .red)
+                                .font(.headline)
+                        }
+                    }
+                    
+                    HStack(spacing: 20) {
+                        // SAT Score Picker
+                        VStack {
+                            
+                            Text("SAT Score")
+                                .font(.headline)
+                                .foregroundColor(.black)
+                            
+                            Picker("SAT Score", selection: $selectedSATScore) {
+                                ForEach(satScores, id: \.self) { score in
+                                    Text("\(score)").tag(score)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                            .frame(width: 175)
+                            .background(Color.white)
+                            .cornerRadius(10)
+                            .onChange(of: selectedSATScore) { _ in
+                                SATCalculatedScore = calculateSATScore(selectedSATScore)
+                            }
+                            .disabled(isChecked)
+                        }
+                        
+                        
+                        // ACT Score Picker
+                        VStack {
+                            Text("ACT Score")
+                                .font(.headline)
+                                .foregroundColor(.black)
+                            
+                            Picker("ACT Score", selection: $selectedACTScore) {
+                                ForEach(actScores, id: \.self) { score in
+                                    Text("\(score)").tag(score)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                            .frame(width: 175)
+                            .background(Color.white)
+                            .cornerRadius(10)
+                            .onChange(of: selectedACTScore) { _ in
+                                ACTCalculatedScore = calculateACTScore(selectedACTScore)
+                            }
+                            .disabled(isChecked)
+                        }
+                    }
+                    
+                    // GPA Picker
+                    VStack {
+                        Text("GPA")
+                            .font(.headline)
+                            .foregroundColor(.black)
+                        
+                        Picker("GPA", selection: $selectedGPA) {
+                            ForEach(gpas, id: \.self) { gpa in
+                                Text(String(format: "%.2f", gpa)).tag(gpa)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .frame(width: 300)
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .onChange(of: selectedGPA) { _ in
+                            GPACalculatedScore = calculateGPAScore(selectedGPA)
+                        }
+                    }
+                    
+                    VStack {
+                        Picker("Select College", selection: $selectedCollege) {
+                            Text("Select a College").tag(nil as College?)
+                            ForEach(colleges, id: \.self) { college in
+                                Text(college.name).tag(college as College?)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .frame(width: 300)
+                        .frame(height: 50)
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .onChange(of: selectedCollege) { _ in
+                            calculateAdmissionProbability()
+                        }
+                    }
+                    
+                    // Display Admission Probability
+                    Text(admissionProbability)
+                        .font(.title2)
+                        .foregroundColor(.blue)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                    
+                    // Display Lowest Score and Improvement Link
+                    if let selectedCollege = selectedCollege {
+                        if let lowestScore = lowestScore {
+                            VStack {
+                                Text("You can improve your chances of getting into \(selectedCollege.name) by working on your \(lowestScore.category).")
+                                    .font(.headline)
+                                    .foregroundColor(.red)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(10)
+                                
+                                if let improvementLink = getImprovementLink(for: lowestScore.category) {
+                                    Link("Click here for tips to improve your \(lowestScore.category)", destination: URL(string: improvementLink)!)
+                                        .font(.headline)
+                                        .foregroundColor(.blue)
+                                        .padding()
+                                        .background(Color.white)
+                                        .cornerRadius(10)
+                                }
+                            }
+                        }
+                    
+                    }
+                }
+                .padding()
+                .onAppear {
+                    fetchColleges()
+                    fetchAcademicAchievements()
+                    fetchAthleticParticipations()
+                    fetchPerformingArtsExperiences()
+                    fetchClubMemberships()
+                    fetchCommunityServiceHours()
+                    fetchHonorsClasses()
+                    fetchUserName()
+                }
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        HStack {
+                            Text("Settings:")
+                                .font(.title3)
+                                .foregroundColor(.black)
+                            
+                            NavigationLink {
+                                SettingsView(showSignInView: $showSignInView)
+                            } label: {
+                                Image(systemName: "gear")
+                                    .font(.headline)
+                            }
+                            
+                        }
+                    }
+                    
+                }
+            }
+        }
+    }
+    
+    func calculateSATScore(_ satScore: Int) -> Int {
+        if isChecked {
+            return 6
+        }
+        switch satScore {
+        case 1550...:
+            return 12
+        case 1500..<1550:
+            return 11
+        case 1450..<1500:
+            return 10
+        case 1400..<1450:
+            return 9
+        case 1350..<1400:
+            return 8
+        case 1300..<1350:
+            return 7
+        case 1250..<1300:
+            return 6
+        case 1200..<1250:
+            return 5
+        case 1150..<1200:
+            return 4
+        case 1100..<1150:
+            return 3
+        case 1050..<1100:
+            return 2
+        case 1000..<1050:
+            return 1
+        default:
+            return 0
+        }
+    }
+
+    func calculateACTScore(_ actScore: Int) -> Int {
+        if isChecked {
+            return 6
+        }
+        switch actScore {
+        case 35...:
+            return 12
+        case 34:
+            return 11
+        case 33:
+            return 10
+        case 32:
+            return 9
+        case 31:
+            return 8
+        case 30:
+            return 7
+        case 29:
+            return 6
+        case 28:
+            return 5
+        case 27:
+            return 4
+        case 26:
+            return 3
+        case 25:
+            return 2
+        case 24:
+            return 1
+        default:
+            return 0
+        }
+    }
+
+    private func calculateGPAScore(_ gpa: Double) -> Int {
+        switch gpa {
+        case 3.90...4.00:
+            return 15
+        case 3.80...3.89:
+            return 14
+        case 3.70...3.79:
+            return 13
+        case 3.60...3.69:
+            return 12
+        case 3.50...3.59:
+            return 11
+        case 3.40...3.49:
+            return 10
+        case 3.30...3.39:
+            return 9
+        case 3.20...3.29:
+            return 8
+        case 3.10...3.19:
+            return 7
+        case 3.00...3.09:
+            return 6
+        case 2.90...2.99:
+            return 5
+        case 2.80...2.89:
+            return 4
+        case 2.70...2.79:
+            return 3
+        case 2.60...2.69:
+            return 2
+        case 1.00...2.59:
+            return 1
+        default:
+            return 1
+        }
+    }
+    
+    func fetchUserName() {
+        // Fetch the user's name from Firestore based on the userID
+        db.collection("users").document(userID).getDocument { (document, error) in
+            if let document = document, document.exists {
+                // Get the user's name from the document data
+                if let name = document["name"] as? String {
+                    self.userName = name // Use 'self' to refer to the state variable
+                }
+            } else {
+                print("User document does not exist")
+            }
+        }
+    }
+    // Fetching functions
+    private func fetchColleges() {
+        let db = Firestore.firestore()
+        
+        db.collection("colleges").getDocuments { (querySnapshot, error) in
+            if let error = error {
+                print("Error getting colleges: \(error.localizedDescription)")
+            } else {
+                var fetchedColleges: [College] = []
+                
+                for document in querySnapshot!.documents {
+                    let collegeName = document.documentID
+                    let EnvisionValue = document.data()["EnvisionValue"] as? Int ?? 0
+                    let college = College(name: collegeName, EnvisionValue: EnvisionValue)
+                    fetchedColleges.append(college)
+                }
+                
+                self.colleges = fetchedColleges
+            }
+        }
+    }
+
+    private func fetchAcademicAchievements() {
+        let db = Firestore.firestore()
+        let userID = Auth.auth().currentUser?.uid ?? ""
+        guard !userID.isEmpty else {
+            print("User ID is empty.")
+            return
+        }
+        
+        let docRef = db.collection("usersData").document(userID)
+        docRef.getDocument { document, error in
+            if let document = document, document.exists {
+                if let academicAchievementsData = document.data()?["academicAchievements"] as? [[String: Any]] {
+                    self.academicAchievements = academicAchievementsData.map { achievement in
+                        guard let name = achievement["achievementName"] as? String,
+                              let grade = achievement["grade"] as? String,
+                              let description = achievement["description"] as? String else {
+                            return Achievement1(name: "", grade: "", description: "")
+                        }
+                        return Achievement1(name: name, grade: grade, description: description)
+                    }
+                }
+            } else {
+                print("You have no academic achievements.")
+            }
+        }
+    }
+
+    private func fetchAthleticParticipations() {
+        let db = Firestore.firestore()
+        let userID = Auth.auth().currentUser?.uid ?? ""
+        guard !userID.isEmpty else {
+            print("User ID is empty.")
+            return
+        }
+        
+        let docRef = db.collection("usersData").document(userID)
+        docRef.getDocument { document, error in
+            if let document = document, document.exists {
+                if let athleticParticipationsData = document.data()?["athleticParticipations"] as? [[String: Any]] {
+                    self.athleticParticipations = athleticParticipationsData.map { participation in
+                        guard let sportName = participation["sportName"] as? String,
+                              let grade = participation["grade"] as? String,
+                              let description = participation["description"] as? String else {
+                            return Participation1(sportName: "", grade: "", description: "")
+                        }
+                        return Participation1(sportName: sportName, grade: grade, description: description)
+                    }
+                }
+            } else {
+                print("You have no athletic participations.")
+            }
+        }
+    }
+
+    private func fetchPerformingArtsExperiences() {
+        let db = Firestore.firestore()
+        let userID = Auth.auth().currentUser?.uid ?? ""
+        guard !userID.isEmpty else {
+            print("User ID is empty.")
+            return
+        }
+        
+        let docRef = db.collection("usersData").document(userID)
+        docRef.getDocument { document, error in
+            if let document = document, document.exists {
+                if let performingArtsExperiencesData = document.data()?["performingArtsExperiences"] as? [[String: Any]] {
+                    self.performingArtsExperiences = performingArtsExperiencesData.map { achievement in
+                        guard let name = achievement["performingArtsExperienceName"] as? String,
+                              let grade = achievement["grade"] as? String,
+                              let description = achievement["description"] as? String else {
+                            return Achievement2(name: "", grade: "", description: "")
+                        }
+                        return Achievement2(name: name, grade: grade, description: description)
+                    }
+                }
+            } else {
+                print("You have no performing arts experiences.")
+            }
+        }
+    }
+    
+    private func fetchClubMemberships() {
+        let db = Firestore.firestore()
+        let userID = Auth.auth().currentUser?.uid ?? ""
+        guard !userID.isEmpty else {
+            print("User ID is empty.")
+            return
+        }
+        
+        let docRef = db.collection("usersData").document(userID)
+        docRef.getDocument { document, error in
+            if let document = document, document.exists {
+                if let clubMembershipsData = document.data()?["clubMemberships"] as? [[String: Any]] {
+                    self.clubMemberships = clubMembershipsData.map { participation in
+                        guard let clubName = participation["clubName"] as? String,
+                              let grade = participation["grade"] as? String,
+                              let description = participation["description"] as? String else {
+                            return Participation2(clubName: "", grade: "", description: "")
+                        }
+                        return Participation2(clubName: clubName, grade: grade, description: description)
+                    }
+                }
+            } else {
+                print("You have no athletic participations.")
+            }
+        }
+    }
+
+    private func fetchCommunityServiceHours() {
+        let db = Firestore.firestore()
+        let userID = Auth.auth().currentUser?.uid ?? ""
+        guard !userID.isEmpty else {
+            print("User ID is empty.")
+            return
+        }
+        
+        let docRef = db.collection("usersData").document(userID)
+        docRef.getDocument { document, error in
+            if let document = document, document.exists {
+                if let clubMembershipsData = document.data()?["communityServiceHours"] as? [[String: Any]] {
+                    self.communityServiceHours = clubMembershipsData.map { participation in
+                        guard let clubName = participation["serviceName"] as? String,
+                              let grade = participation["grade"] as? String,
+                              let description = participation["description"] as? String else {
+                            return Participation3(clubName: "", grade: "", description: "")
+                        }
+                        return Participation3(clubName: clubName, grade: grade, description: description)
+                    }
+                }
+            } else {
+                print("You have no athletic participations.")
+            }
+        }
+    }
+
+    private func fetchHonorsClasses() {
+        let db = Firestore.firestore()
+        let userID = Auth.auth().currentUser?.uid ?? ""
+        guard !userID.isEmpty else {
+            print("User ID is empty.")
+            return
+        }
+        
+        let docRef = db.collection("usersData").document(userID)
+        docRef.getDocument { document, error in
+            if let document = document, document.exists {
+                if let clubMembershipsData = document.data()?["honorsClasses"] as? [[String: Any]] {
+                    self.honorsClasses = clubMembershipsData.map { participation in
+                        guard let clubName = participation["className"] as? String,
+                              let grade = participation["grade"] as? String,
+                              let description = participation["description"] as? String else {
+                            return Participation4(clubName: "", grade: "", description: "")
+                        }
+                        return Participation4(clubName: clubName, grade: grade, description: description)
+                    }
+                }
+            } else {
+                print("You have no athletic participations.")
+            }
+        }
+    }
+    
+    private func calculateAdmissionProbability() {
+        guard let selectedCollege = selectedCollege else {
+            admissionProbability = ""
+            return
+        }
+        
+        let scoreDifference = selectedCollege.EnvisionValue - finalScore
+        let percentChance = (Double(finalScore) / Double(selectedCollege.EnvisionValue)) * 100
+        
+        if percentChance > 80 {
+            admissionProbability = "\(selectedCollege.name) is a safety school for you."
+        } else if percentChance > 50 {
+            admissionProbability = "\(selectedCollege.name) is a target school for you."
+        } else {
+            admissionProbability = "\(selectedCollege.name) is a reach school for you."
+        }
+        
+    }
+
+    private func getImprovementLink(for category: String) -> String? {
+        let links = [
+            "Academic Achievements": "https://blog.collegevine.com/extracurriculars-for-high-schoolers/",
+            "Athletic Participation": "https://blog.collegevine.com/the-four-tiers-of-extracurricular-activities/",
+            "Performing Arts Experience": "https://blog.collegevine.com/how-to-build-an-impressive-performing-arts-portfolio-for-college/",
+            "Clubs and Organizations": "https://blog.collegevine.com/the-ultimate-guide-to-forming-a-club-in-high-school/",
+            "Community Service Hours": "https://blog.collegevine.com/why-community-service-matters-in-high-school/",
+            "Honors Classes": "https://blog.collegevine.com/what-are-honors-classes-and-why-should-you-take-them/",
+            "GPA": "https://blog.collegevine.com/how-to-raise-your-gpa/",
+            "Standardized Test Scores": "https://blog.collegevine.com/how-to-improve-your-sat-score/"
+        ]
+        
+        return links[category]
+    }
+}
+
+struct College: Identifiable, Hashable {
+    var id = UUID()
+    var name: String
+    var EnvisionValue: Int
+}
+
+#Preview {
+    CollegeCalculatorPage()
+}
