@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Effective Date: 6/20//2024**
+**Effective Date: 6/20/2024**
 
 ## 1. Introduction
 Welcome to Envision. Your privacy is important to us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application (the “App”). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the App.
