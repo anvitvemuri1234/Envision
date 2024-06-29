@@ -71,4 +71,4 @@ For assistance, users can access a dedicated FAQ page by clicking on the "FAQ" i
 To install Envision, download it from the App Store (iOS). Follow the standard installation process for your device. After installation, sign in with google, apple, or email. In addition, you can sign in anonymously.
 
 ### License
-The HS Portfolio Creator app is licensed under the MIT License. For more details, please refer to the P file in the repository.
+The HS Portfolio Creator app is licensed under the MIT License. For more details, please refer to the Copyright Compliance file in the repository.
