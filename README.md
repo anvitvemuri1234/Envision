@@ -1,16 +1,68 @@
-# Introduction
-Envision is an innovative mobile application designed to assist high school students in documenting their extracurricular activities. The app serves as a digital portfolio, enabling students to log, manage, and share their achievements. It is available on both web and mobile platforms, providing flexibility and convenience for all users.
+# Envision
 
-## Student Functionality
-Students can log in to their accounts using a designated passkey, which is set to "1234" for testing purposes. Once logged in, they can input and describe activities they have participated in under six different categories: Academic Achievements, Sports, Arts, Volunteering, Clubs, and Miscellaneous. All data is stored dynamically through a cloud-based dataset, ensuring it is secure and accessible from any device.
+Envision is a mobile application designed to help high school students efficiently track and manage their extracurricular activities, academic achievements, and more. This app aims to streamline the resume-building process, provide college application insights, and offer guidance from school administrators.
 
-The app generates comprehensive portfolio reports for each category of activity. These reports can be viewed and downloaded, and students can upload them directly to Instagram and LinkedIn, showcasing their achievements to a broader audience.
+## Features
 
-## Administrator Functionality
-Administrators have secure access using a separate passkey (currently "1234"). They can view and edit the portfolios of all students, ensuring the accuracy of the information and monitoring student progress effectively.
+- **Activity Tracking**: Easily input and categorize activities with a few clicks.
+- **Portfolio Building**: Create a comprehensive portfolio divided into six main categories: Academic Achievements, Athletic Participation, Performing Arts Experience, Clubs and Organizations, Community Service Hours, and Honors Classes.
+- **Resume Viewer**: Consolidate your portfolio into a professional resume and share it via email, text, or social media.
+- **College Calculator**: Estimate your chances of admission to specific colleges and get suggestions on how to improve your application.
+- **Administrator Access**: Allow guidance counselors to view and edit student portfolios and provide personalized advice.
+- **FAQ and Bug Reporting**: Access a helpful FAQ page and report any bugs directly to the developers.
 
-## Technical Details
-HS Portfolio Creator is available as a mobile app on iOS and Android, and as a web application. The backend utilizes Firebase Firestore for dynamic and secure data storage, while the frontend is built using SwiftUI for iOS, Kotlin for Android, and React for the web application. Authentication is managed through Firebase Authentication to ensure secure login processes for both students and administrators.
+## Usage Instructions
+
+### Log In
+
+1. **Open Envision** and log in through Apple, Google, or with an email address.
+2. **First-time users** will need to provide additional information such as name, school, and graduation year.
+3. **Returning users** can click the “I already have an account” button to bypass the setup step.
+
+### Portfolio Building
+
+1. Navigate to the **Portfolio** section.
+2. Select a category and click the **plus icon** to add a new entry.
+3. Enter the details of your activity or achievement and click **confirm**.
+4. Edit or delete entries as needed.
+
+### Resume Viewer
+
+1. Access your **Resume** from the main menu.
+2. Review the consolidated version of your portfolio.
+3. Share your resume via email, text, or social media using the **share icon**.
+
+### College Calculator
+
+1. Go to the **College Calculator** section.
+2. Enter your standardized test scores and GPA.
+3. Select a university from the dropdown menu.
+4. View your admission chances and get suggestions for improvement.
+
+### Administrator Access
+
+1. Authorized administrators can create an account linked to their school.
+2. Admin access is secured with a unique passkey.
+3. Administrators can view and edit student portfolios and provide personalized advice.
+
+## Development
+
+### Technologies Used
+
+- **Swift**: Programming language for iOS development.
+- **Xcode**: Integrated development environment (IDE) for macOS.
+- **Firebase**: Backend platform for data storage and real-time database management.
+- **Figma**: Interface design tool for creating wireframes.
+- **Code.org**: Platform used for developing the initial prototype.
+
+### Structure
+
+- `Envision.xcodeproj`: Xcode project file.
+- `AppDelegate.swift`: Application delegate for app lifecycle management.
+- `ViewController.swift`: Main view controller for handling user interactions.
+- `Models/`: Directory containing data models.
+- `Views/`: Directory containing UI components.
+- `Controllers/`: Directory containing view controllers and business logic.
 
 ## Help and Support
 For assistance, users can access a dedicated FAQ page by clicking on the "FAQ" icon on the homepage. This page provides detailed information about using the app and troubleshooting common issues. Additionally, users can report any bugs or issues they encounter through the FAQ page, which is valuable for improving the app.
@@ -18,8 +70,5 @@ For assistance, users can access a dedicated FAQ page by clicking on the "FAQ" i
 ### Installation and Running the App
 To install Envision, download it from the App Store (iOS). Follow the standard installation process for your device. After installation, sign in with google, apple, or email. In addition, you can sign in anonymously.
 
-### Contributing
-We welcome contributions to improve the HS Portfolio Creator app. To contribute, fork the repository, create a new branch for your feature or bugfix, commit your changes, and push your branch to your fork. Then, create a pull request with a detailed description of your changes.
-
 ### License
-The HS Portfolio Creator app is licensed under the MIT License. For more details, please refer to the LICENSE file in the repository.
+The HS Portfolio Creator app is licensed under the MIT License. For more details, please refer to the P file in the repository.
